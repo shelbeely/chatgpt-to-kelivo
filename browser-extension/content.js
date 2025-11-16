@@ -110,13 +110,20 @@
                     console.log(`    title: ${copyButton.getAttribute('title')}`);
                     console.log(`    class: ${copyButton.className}`);
 
-                    // 通过模拟点击获取 Markdown 内容
+                    // 通过模拟点击获取内容（HTML 格式，然后转换为 Markdown）
                     const copiedContent = await getCopyButtonContent(copyButton, msgElement);
 
-                    if (copiedContent && copiedContent.text && copiedContent.text.trim()) {
-                        console.log(`  ✅ 成功获取内容，长度: ${copiedContent.text.length}`);
+                    if (copiedContent && copiedContent.markdown && copiedContent.markdown.trim()) {
+                        console.log(`  ✅ 成功获取 Markdown 内容，长度: ${copiedContent.markdown.length}`);
 
-                        // 🔥 使用复制的内容（ChatGPT 的复制按钮会复制 Markdown 格式）
+                        // 🔥 使用转换后的 Markdown 内容
+                        let content = copiedContent.markdown;
+
+                        messages.push({ role, content });
+                    } else if (copiedContent && copiedContent.text && copiedContent.text.trim()) {
+                        console.log(`  ⚠️ 只获取到纯文本，长度: ${copiedContent.text.length}`);
+
+                        // 回退到纯文本
                         let content = copiedContent.text;
 
                         messages.push({ role, content });
@@ -156,7 +163,7 @@
         }
     }
 
-    // 通过复制按钮获取内容（支持 Markdown 和 HTML）
+    // 通过复制按钮获取内容（获取 HTML 并转换为 Markdown）
     async function getCopyButtonContent(button, msgElement) {
         return new Promise((resolve) => {
             let copiedContent = { text: '', html: '', markdown: '' };
@@ -177,37 +184,34 @@
                 return null;
             };
 
-            // 方法 2: 监听复制事件，获取所有格式
+            // 方法 2: 监听复制事件，获取 HTML 并转换为 Markdown
             const copyListener = (e) => {
                 if (!resolved) {
                     try {
                         // 获取纯文本
                         const plainText = e.clipboardData.getData('text/plain');
 
-                        // 获取 HTML
+                        // 🔥 获取 HTML（这是关键！）
                         const html = e.clipboardData.getData('text/html');
 
-                        // 检查是否是 Markdown 格式
-                        let markdown = plainText;
-                        const hasMarkdownSyntax =
-                            plainText.includes('```') ||
-                            plainText.includes('**') ||
-                            plainText.includes('- ') ||
-                            plainText.includes('* ') ||
-                            (plainText.includes('[') && plainText.includes(']('));
-
                         if (plainText && plainText.trim()) {
-                            copiedContent = {
-                                text: plainText,
-                                html: html || '',
-                                markdown: markdown,
-                                hasMarkdownSyntax: hasMarkdownSyntax
-                            };
-
                             console.log(`    ✅ 通过 copy 事件获取到内容`);
                             console.log(`      纯文本长度: ${plainText.length}`);
                             console.log(`      HTML 长度: ${html ? html.length : 0}`);
-                            console.log(`      包含 Markdown 语法: ${hasMarkdownSyntax}`);
+
+                            // 🔥 如果有 HTML，转换为 Markdown
+                            let markdown = plainText;
+                            if (html && html.trim()) {
+                                console.log(`      🔄 将 HTML 转换为 Markdown...`);
+                                markdown = convertHtmlToMarkdown(html);
+                                console.log(`      ✅ 转换后的 Markdown 长度: ${markdown.length}`);
+                            }
+
+                            copiedContent = {
+                                text: plainText,
+                                html: html || '',
+                                markdown: markdown
+                            };
 
                             resolved = true;
                             document.removeEventListener('copy', copyListener);
@@ -279,6 +283,16 @@
                 }
             }, 2000);
         });
+    }
+
+    // 🔥 将 HTML 转换为 Markdown
+    function convertHtmlToMarkdown(html) {
+        // 创建一个临时 DOM 元素来解析 HTML
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+
+        // 使用现有的 htmlToMarkdown 函数
+        return htmlToMarkdown(tempDiv);
     }
 
     // 从元素中提取内容（备用方法）
@@ -902,12 +916,24 @@
                     console.log(`      li HTML 预览: ${li.outerHTML.substring(0, 200)}`);
                 }
 
-                const indent = '  '.repeat(listLevel);
-                const marker = isOrdered ? `${index}. ` : '• ';
+                // 🔥 修复：使用更多空格确保 Kelivo 正确识别嵌套列表
+                // 第一级：3 个空格（* 标记）
+                // 第二级：5 个空格（缩进）
+                // 第三级及以上：每级增加 2 个空格
+                let indent = '';
+                if (listLevel === 0) {
+                    indent = '';
+                } else if (listLevel === 1) {
+                    indent = '     '; // 5 个空格
+                } else {
+                    indent = '     ' + '  '.repeat(listLevel - 1); // 5 + 2*(level-1) 个空格
+                }
+                const marker = isOrdered ? `${index}. ` : '* ';
 
                 // 直接处理 li 的内容，不增加 listLevel
                 // 这样可以保留完整的格式
                 let content = '';
+                let hasNestedList = false;
 
                 // 遍历 li 的所有子节点
                 for (const child of li.childNodes) {
@@ -926,6 +952,8 @@
 
                         // 对于嵌套列表，递归处理
                         if (tag === 'ul' || tag === 'ol') {
+                            hasNestedList = true;
+                            // 🔥 嵌套列表需要额外的换行和缩进
                             content += '\n' + processListItems(child, tag === 'ol', listLevel + 1, debug);
                         } else {
                             // 其他元素正常处理
@@ -941,14 +969,24 @@
                 }
 
                 // 处理多行内容
-                const lines = content.split('\n').filter(line => line.trim());
-                if (lines.length > 0) {
+                const lines = content.split('\n');
+                if (lines.length > 0 && lines[0].trim()) {
                     // 第一行加上列表标记
-                    result += indent + marker + lines[0] + '\n';
+                    result += indent + marker + lines[0].trim() + '\n';
 
-                    // 后续行缩进对齐
+                    // 后续行缩进对齐（如果有嵌套列表，保持原有缩进）
                     for (let i = 1; i < lines.length; i++) {
-                        result += indent + '  ' + lines[i] + '\n';
+                        const line = lines[i];
+                        if (line.trim()) {
+                            // 如果这一行已经有缩进（嵌套列表），保持原有缩进
+                            if (line.match(/^\s+[*\-\d]/)) {
+                                // 这是嵌套列表项，保持原有缩进
+                                result += indent + '  ' + line + '\n';
+                            } else {
+                                // 否则添加对齐缩进（与列表标记后的内容对齐）
+                                result += indent + '  ' + line.trim() + '\n';
+                            }
+                        }
                     }
                 } else {
                     if (debug) {
