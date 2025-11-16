@@ -31,6 +31,8 @@
 
 ## 使用方法
 
+![使用示例](images/usage-example.png)
+
 1. **启动服务器**：运行 `kelivo_import_server.exe`
 2. **打开 ChatGPT**：访问 https://chatgpt.com 并打开任意对话
 3. **点击导出按钮**：页面右上角会出现"导出到 Kelivo"按钮
