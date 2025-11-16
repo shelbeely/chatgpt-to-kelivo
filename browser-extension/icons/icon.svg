@@ -1,0 +1,19 @@
+<svg width="128" height="128" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- 背景圆角矩形 -->
+  <rect width="128" height="128" rx="24" fill="url(#grad)"/>
+  
+  <!-- 下载图标 -->
+  <g transform="translate(32, 32)" stroke="white" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 0 40 L 0 56 A 8 8 0 0 0 8 64 L 56 64 A 8 8 0 0 0 64 56 L 64 40"/>
+    <polyline points="16 28 32 44 48 28"/>
+    <line x1="32" y1="44" x2="32" y2="0"/>
+  </g>
+</svg>
+

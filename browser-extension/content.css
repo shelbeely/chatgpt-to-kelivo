@@ -1,0 +1,278 @@
+/* ChatGPT to Kelivo - 样式 */
+
+#kelivo-export-btn {
+    position: fixed;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 9999;
+    
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#kelivo-export-btn:hover {
+    transform: translateY(-50%) scale(1.05);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+#kelivo-export-btn:active {
+    transform: translateY(-50%) scale(0.98);
+}
+
+#kelivo-export-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+#kelivo-export-btn svg {
+    flex-shrink: 0;
+}
+
+/* 加载动画 */
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* 通知样式 */
+.kelivo-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    
+    padding: 16px 24px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    
+    opacity: 0;
+    transform: translateX(400px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.kelivo-notification.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.kelivo-notification.success {
+    background: #10b981;
+    color: white;
+}
+
+.kelivo-notification.error {
+    background: #ef4444;
+    color: white;
+}
+
+.kelivo-notification.info {
+    background: #3b82f6;
+    color: white;
+}
+
+/* 对话框遮罩 */
+.kelivo-dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10000;
+
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* 对话框 */
+.kelivo-dialog {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.kelivo-dialog-icon {
+    font-size: 48px;
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.kelivo-dialog-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    text-align: center;
+    margin: 0 0 16px 0;
+}
+
+.kelivo-dialog-message {
+    font-size: 16px;
+    color: #666;
+    text-align: center;
+    margin: 0 0 24px 0;
+    line-height: 1.6;
+}
+
+.kelivo-dialog-steps {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.kelivo-dialog-steps h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 12px 0;
+}
+
+.kelivo-dialog-steps ol {
+    margin: 0;
+    padding-left: 20px;
+    color: #555;
+}
+
+.kelivo-dialog-steps li {
+    margin: 8px 0;
+    line-height: 1.6;
+}
+
+.kelivo-dialog-steps code {
+    background: #e9ecef;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    color: #d63384;
+}
+
+.kelivo-dialog-note {
+    background: #fff3cd;
+    border-left: 4px solid #ffc107;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 24px;
+    color: #856404;
+    line-height: 1.6;
+}
+
+.kelivo-dialog-note strong {
+    color: #664d03;
+}
+
+.kelivo-dialog-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.kelivo-dialog-btn {
+    padding: 12px 32px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.kelivo-dialog-btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.kelivo-dialog-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.kelivo-dialog-btn-primary:active {
+    transform: translateY(0);
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    #kelivo-export-btn {
+        right: 10px;
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+
+    #kelivo-export-btn span {
+        display: none;
+    }
+
+    .kelivo-notification {
+        right: 10px;
+        left: 10px;
+        max-width: calc(100% - 20px);
+    }
+
+    .kelivo-dialog {
+        padding: 24px;
+        max-width: 90%;
+    }
+
+    .kelivo-dialog-title {
+        font-size: 20px;
+    }
+
+    .kelivo-dialog-message {
+        font-size: 14px;
+    }
+}
+
