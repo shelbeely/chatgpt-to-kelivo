@@ -39,6 +39,8 @@
 4. **等待导出完成**：扩展会自动提取对话内容并发送到 Kelivo
 5. **查看导出结果**：导出的 Markdown 文件会保存在 Kelivo 的导入目录中
 
+![Kelivo 导入结果](images/kelivo-result.png)
+
 ## 功能特点
 
 - ✅ 自动提取完整对话内容
