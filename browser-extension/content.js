@@ -42,14 +42,14 @@
                 const msgElement = messageElements[i];
                 const role = msgElement.getAttribute('data-message-author-role');
 
-                console.log(`处理消息 ${i + 1}/${messageElements.length} [${role}]...`);
+                console.log(`\n处理消息 ${i + 1}/${messageElements.length} [${role}]...`);
 
                 // 🔥 触发鼠标悬停事件，让复制按钮显示出来
                 msgElement.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
                 msgElement.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
 
-                // 等待一下让按钮显示
-                await new Promise(resolve => setTimeout(resolve, 200));
+                // 等待一下让按钮显示（增加到 500ms）
+                await new Promise(resolve => setTimeout(resolve, 500));
 
                 // 查找复制按钮 - 尝试多种选择器
                 let copyButton = null;
@@ -77,19 +77,27 @@
                     return false;
                 };
 
-                // 🔥 在消息元素及其父元素中查找
+                // 🔥 策略：优先在消息元素外部查找（工具栏），然后在消息内部查找
                 const searchElements = [
-                    msgElement,
-                    msgElement.parentElement,
-                    msgElement.parentElement?.parentElement
+                    msgElement.parentElement,              // 优先：父元素（工具栏通常在这里）
+                    msgElement.parentElement?.parentElement, // 次优：祖父元素
+                    msgElement                              // 最后：消息元素内部
                 ].filter(el => el !== null);
 
-                // 方法 1: 优先查找精确匹配的消息复制按钮
+                // 方法 1: 优先查找消息元素外部的复制按钮
                 for (const searchEl of searchElements) {
                     const candidateButtons = searchEl.querySelectorAll('button[aria-label*="Copy"], button[aria-label*="copy"], button[aria-label*="复制"]');
+
                     for (const btn of candidateButtons) {
+                        // 🔥 如果在父元素中查找，优先选择不在消息元素内部的按钮
+                        if (searchEl !== msgElement && msgElement.contains(btn)) {
+                            console.log(`  ⏭️ 跳过消息内部的按钮: aria-label="${btn.getAttribute('aria-label')}"`);
+                            continue;
+                        }
+
                         if (isMessageCopyButton(btn)) {
-                            console.log(`  ✅ 找到消息复制按钮: aria-label="${btn.getAttribute('aria-label')}"`);
+                            const location = msgElement.contains(btn) ? '消息内部' : '消息外部';
+                            console.log(`  ✅ 找到消息复制按钮 (${location}): aria-label="${btn.getAttribute('aria-label')}"`);
                             copyButton = btn;
                             break;
                         } else {
@@ -104,8 +112,14 @@
                     for (const searchEl of searchElements) {
                         const candidateButtons = searchEl.querySelectorAll('button[title*="Copy"], button[title*="copy"], button[title*="复制"]');
                         for (const btn of candidateButtons) {
+                            // 同样优先选择消息外部的按钮
+                            if (searchEl !== msgElement && msgElement.contains(btn)) {
+                                continue;
+                            }
+
                             if (isMessageCopyButton(btn)) {
-                                console.log(`  ✅ 找到消息复制按钮 (通过 title): title="${btn.getAttribute('title')}"`);
+                                const location = msgElement.contains(btn) ? '消息内部' : '消息外部';
+                                console.log(`  ✅ 找到消息复制按钮 (${location}, 通过 title): title="${btn.getAttribute('title')}"`);
                                 copyButton = btn;
                                 break;
                             }
@@ -167,7 +181,19 @@
                 await new Promise(resolve => setTimeout(resolve, 100));
             }
 
-            console.log(`✅ 通过复制按钮提取到 ${messages.length} 条消息`);
+            console.log(`\n=== 提取完成 ===`);
+            console.log(`总消息数: ${messageElements.length}`);
+            console.log(`成功提取: ${messages.length}`);
+            console.log(`失败/跳过: ${messageElements.length - messages.length}`);
+
+            if (messages.length < messageElements.length) {
+                console.log(`\n⚠️ 有 ${messageElements.length - messages.length} 条消息未能提取`);
+                console.log(`可能原因：`);
+                console.log(`  1. 消息包含图片，没有复制按钮`);
+                console.log(`  2. 复制按钮点击失败或超时`);
+                console.log(`  3. 消息格式特殊，无法识别复制按钮`);
+            }
+
             return messages.length > 0 ? messages : null;
 
         } catch (error) {
@@ -286,15 +312,19 @@
             // 执行点击
             clickButton();
 
-            // 超时处理
+            // 超时处理（增加到 3 秒）
             setTimeout(() => {
                 if (!resolved) {
                     resolved = true;
                     document.removeEventListener('copy', copyListener);
-                    console.log('    ⚠️ 复制超时，未获取到内容');
+                    console.log('    ⚠️ 复制超时（3秒），未获取到内容');
+                    console.log('    可能原因：');
+                    console.log('      1. 消息包含图片，复制按钮不可用');
+                    console.log('      2. 复制按钮点击失败');
+                    console.log('      3. 网络延迟或页面加载未完成');
                     resolve(copiedContent);
                 }
-            }, 2000);
+            }, 3000);
         });
     }
 
