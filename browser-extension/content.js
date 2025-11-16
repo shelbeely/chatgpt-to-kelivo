@@ -54,6 +54,29 @@
                 // 查找复制按钮 - 尝试多种选择器
                 let copyButton = null;
 
+                // 🔥 新策略：优先查找精确匹配的消息复制按钮
+                // 根据 aria-label 的值来判断是否是消息级别的复制按钮
+                const isMessageCopyButton = (btn) => {
+                    const ariaLabel = btn.getAttribute('aria-label') || '';
+                    const title = btn.getAttribute('title') || '';
+
+                    // 消息级别的复制按钮：aria-label 精确匹配 "复制" 或 "Copy"
+                    if (ariaLabel === '复制' || ariaLabel === 'Copy' || ariaLabel === 'Copy message') {
+                        return true;
+                    }
+
+                    // 排除内容块的复制按钮
+                    if (ariaLabel.includes('代码') || ariaLabel.includes('code') ||
+                        ariaLabel.includes('表格') || ariaLabel.includes('table') ||
+                        ariaLabel.includes('图') || ariaLabel.includes('diagram') ||
+                        title.includes('代码') || title.includes('code') ||
+                        title.includes('表格') || title.includes('table')) {
+                        return false;
+                    }
+
+                    return false;
+                };
+
                 // 🔥 在消息元素及其父元素中查找
                 const searchElements = [
                     msgElement,
@@ -61,47 +84,34 @@
                     msgElement.parentElement?.parentElement
                 ].filter(el => el !== null);
 
-                // 在所有可能的元素中查找复制按钮
+                // 方法 1: 优先查找精确匹配的消息复制按钮
                 for (const searchEl of searchElements) {
-                    // 方法 1: 通过 aria-label 查找
-                    copyButton = searchEl.querySelector('button[aria-label*="Copy"], button[aria-label*="copy"], button[aria-label*="复制"]');
-                    if (copyButton) break;
-
-                    // 方法 2: 通过 title 查找
-                    copyButton = searchEl.querySelector('button[title*="Copy"], button[title*="copy"], button[title*="复制"]');
-                    if (copyButton) break;
-
-                    // 方法 3: 查找所有按钮，检查文本内容
-                    const buttons = searchEl.querySelectorAll('button');
-                    for (const btn of buttons) {
-                        const text = btn.textContent.toLowerCase();
-                        const ariaLabel = (btn.getAttribute('aria-label') || '').toLowerCase();
-                        const title = (btn.getAttribute('title') || '').toLowerCase();
-                        const innerHTML = btn.innerHTML.toLowerCase();
-
-                        if (text.includes('copy') || text.includes('复制') ||
-                            ariaLabel.includes('copy') || ariaLabel.includes('复制') ||
-                            title.includes('copy') || title.includes('复制') ||
-                            innerHTML.includes('copy') || innerHTML.includes('复制')) {
+                    const candidateButtons = searchEl.querySelectorAll('button[aria-label*="Copy"], button[aria-label*="copy"], button[aria-label*="复制"]');
+                    for (const btn of candidateButtons) {
+                        if (isMessageCopyButton(btn)) {
+                            console.log(`  ✅ 找到消息复制按钮: aria-label="${btn.getAttribute('aria-label')}"`);
                             copyButton = btn;
                             break;
+                        } else {
+                            console.log(`  ⏭️ 跳过内容块复制按钮: aria-label="${btn.getAttribute('aria-label')}"`);
                         }
                     }
                     if (copyButton) break;
+                }
 
-                    // 方法 4: 查找包含复制图标的按钮
-                    for (const btn of buttons) {
-                        const svg = btn.querySelector('svg');
-                        if (svg) {
-                            const svgClass = svg.getAttribute('class') || '';
-                            const svgHTML = svg.innerHTML || '';
-                            if (svgClass.includes('copy') || svgHTML.includes('clipboard')) {
+                // 方法 2: 如果没找到，尝试通过 title 查找
+                if (!copyButton) {
+                    for (const searchEl of searchElements) {
+                        const candidateButtons = searchEl.querySelectorAll('button[title*="Copy"], button[title*="copy"], button[title*="复制"]');
+                        for (const btn of candidateButtons) {
+                            if (isMessageCopyButton(btn)) {
+                                console.log(`  ✅ 找到消息复制按钮 (通过 title): title="${btn.getAttribute('title')}"`);
                                 copyButton = btn;
                                 break;
                             }
                         }
+                        if (copyButton) break;
                     }
-                    if (copyButton) break;
                 }
 
                 if (copyButton) {
@@ -133,20 +143,23 @@
                 } else {
                     console.log(`  ❌ 未找到复制按钮，跳过此消息`);
 
-                    // 调试：显示该消息及其父元素中所有按钮的信息
-                    if (i < 2) {  // 只显示前 2 条消息的调试信息
-                        for (const searchEl of searchElements) {
-                            const allButtons = searchEl.querySelectorAll('button');
-                            if (allButtons.length > 0) {
-                                console.log(`  在 ${searchEl === msgElement ? '消息元素' : '父元素'} 中找到 ${allButtons.length} 个按钮:`);
-                                allButtons.forEach((btn, btnIdx) => {
-                                    console.log(`    按钮 ${btnIdx + 1}:`);
-                                    console.log(`      aria-label: ${btn.getAttribute('aria-label')}`);
-                                    console.log(`      title: ${btn.getAttribute('title')}`);
-                                    console.log(`      textContent: ${btn.textContent.substring(0, 30)}`);
-                                });
-                            }
+                    // 🔥 显示所有按钮的详细信息（帮助调试）
+                    for (const searchEl of searchElements) {
+                        const allButtons = searchEl.querySelectorAll('button');
+                        if (allButtons.length > 0) {
+                            console.log(`  在 ${searchEl === msgElement ? '消息元素' : '父元素'} 中找到 ${allButtons.length} 个按钮:`);
+                            allButtons.forEach((btn, btnIdx) => {
+                                const ariaLabel = btn.getAttribute('aria-label') || '';
+                                const title = btn.getAttribute('title') || '';
+                                console.log(`    按钮 ${btnIdx + 1}: aria-label="${ariaLabel}", title="${title}"`);
+                            });
                         }
+                    }
+
+                    // 🔥 检查消息是否包含图片
+                    const hasImage = msgElement.querySelector('img');
+                    if (hasImage) {
+                        console.log(`  ⚠️ 此消息包含图片，可能没有复制按钮`);
                     }
                 }
 
