@@ -21,7 +21,7 @@
         document.body.appendChild(button);
     }
 
-    // 🔥 新方法：通过模拟点击复制按钮获取完整内容
+    // 🔥 最终修复版本：使用空间位置关系查找复制按钮
     async function extractByClickingCopyButtons() {
         console.log('🔥 尝试通过复制按钮获取完整内容...');
 
@@ -34,6 +34,63 @@
                 console.log('❌ 未找到消息元素');
                 return null;
             }
+
+            // 获取所有页面中的复制按钮
+            // 支持多语言：支持 20+ 种语言的 "复制" 按钮
+            const copyButtonLabels = [
+                // 英文
+                'Copy',
+                // 中文
+                '复制',
+                // 日本語
+                'コピー',
+                // 한국어
+                '복사',
+                // Español
+                'Copiar',
+                // Français
+                'Copier',
+                // Deutsch
+                'Kopieren',
+                // Italiano
+                'Copia',
+                // Português
+                'Copiar',
+                // Русский
+                'Копировать',
+                // العربية
+                'نسخ',
+                // ไทย
+                'คัดลอก',
+                // Tiếng Việt
+                'Sao chép',
+                // Bahasa Indonesia
+                'Salin',
+                // Türkçe
+                'Kopyala',
+                // Ελληνικά
+                'Αντιγραφή',
+                // עברית
+                'העתק',
+                // हिन्दी
+                'कॉपी करें',
+                // 繁體中文
+                '複製',
+                // Українська
+                'Копіювати',
+                // Polskie
+                'Kopiuj',
+                // Čeština
+                'Kopírovat',
+                // Română
+                'Copiere'
+            ];
+
+            const allCopyButtons = Array.from(document.querySelectorAll('button')).filter(btn => {
+                const ariaLabel = btn.getAttribute('aria-label') || '';
+                return copyButtonLabels.includes(ariaLabel);
+            });
+            console.log(`页面中有 ${allCopyButtons.length} 个复制按钮`);
 
             const messages = [];
 
@@ -48,91 +105,35 @@
                 msgElement.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
                 msgElement.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
 
-                // 等待一下让按钮显示（增加到 500ms）
+                // 等待一下让按钮显示
                 await new Promise(resolve => setTimeout(resolve, 500));
 
-                // 查找复制按钮 - 尝试多种选择器
+                // 🔥 关键改进：使用空间位置关系查找复制按钮
+                // 按钮在消息下方，距离 4-62px
+                const msgRect = msgElement.getBoundingClientRect();
                 let copyButton = null;
+                let closestDistance = Infinity;
 
-                // 🔥 新策略：优先查找精确匹配的消息复制按钮
-                // 根据 aria-label 的值来判断是否是消息级别的复制按钮
-                const isMessageCopyButton = (btn) => {
-                    const ariaLabel = btn.getAttribute('aria-label') || '';
-                    const title = btn.getAttribute('title') || '';
+                // 查找消息下方最近的复制按钮
+                for (const btn of allCopyButtons) {
+                    const btnRect = btn.getBoundingClientRect();
 
-                    // 消息级别的复制按钮：aria-label 精确匹配 "复制" 或 "Copy"
-                    if (ariaLabel === '复制' || ariaLabel === 'Copy' || ariaLabel === 'Copy message') {
-                        return true;
-                    }
+                    // 检查按钮是否在消息下方（允许 100px 的误差）
+                    if (btnRect.top >= msgRect.bottom - 100) {
+                        const distance = btnRect.top - msgRect.bottom;
 
-                    // 排除内容块的复制按钮
-                    if (ariaLabel.includes('代码') || ariaLabel.includes('code') ||
-                        ariaLabel.includes('表格') || ariaLabel.includes('table') ||
-                        ariaLabel.includes('图') || ariaLabel.includes('diagram') ||
-                        title.includes('代码') || title.includes('code') ||
-                        title.includes('表格') || title.includes('table')) {
-                        return false;
-                    }
-
-                    return false;
-                };
-
-                // 🔥 策略：优先在消息元素外部查找（工具栏），然后在消息内部查找
-                const searchElements = [
-                    msgElement.parentElement,              // 优先：父元素（工具栏通常在这里）
-                    msgElement.parentElement?.parentElement, // 次优：祖父元素
-                    msgElement                              // 最后：消息元素内部
-                ].filter(el => el !== null);
-
-                // 方法 1: 优先查找消息元素外部的复制按钮
-                for (const searchEl of searchElements) {
-                    const candidateButtons = searchEl.querySelectorAll('button[aria-label*="Copy"], button[aria-label*="copy"], button[aria-label*="复制"]');
-
-                    for (const btn of candidateButtons) {
-                        // 🔥 如果在父元素中查找，优先选择不在消息元素内部的按钮
-                        if (searchEl !== msgElement && msgElement.contains(btn)) {
-                            console.log(`  ⏭️ 跳过消息内部的按钮: aria-label="${btn.getAttribute('aria-label')}"`);
-                            continue;
-                        }
-
-                        if (isMessageCopyButton(btn)) {
-                            const location = msgElement.contains(btn) ? '消息内部' : '消息外部';
-                            console.log(`  ✅ 找到消息复制按钮 (${location}): aria-label="${btn.getAttribute('aria-label')}"`);
+                        // 找最近的按钮
+                        if (distance < closestDistance) {
+                            closestDistance = distance;
                             copyButton = btn;
-                            break;
-                        } else {
-                            console.log(`  ⏭️ 跳过内容块复制按钮: aria-label="${btn.getAttribute('aria-label')}"`);
                         }
-                    }
-                    if (copyButton) break;
-                }
-
-                // 方法 2: 如果没找到，尝试通过 title 查找
-                if (!copyButton) {
-                    for (const searchEl of searchElements) {
-                        const candidateButtons = searchEl.querySelectorAll('button[title*="Copy"], button[title*="copy"], button[title*="复制"]');
-                        for (const btn of candidateButtons) {
-                            // 同样优先选择消息外部的按钮
-                            if (searchEl !== msgElement && msgElement.contains(btn)) {
-                                continue;
-                            }
-
-                            if (isMessageCopyButton(btn)) {
-                                const location = msgElement.contains(btn) ? '消息内部' : '消息外部';
-                                console.log(`  ✅ 找到消息复制按钮 (${location}, 通过 title): title="${btn.getAttribute('title')}"`);
-                                copyButton = btn;
-                                break;
-                            }
-                        }
-                        if (copyButton) break;
                     }
                 }
 
                 if (copyButton) {
-                    console.log(`  ✅ 找到复制按钮`);
+                    console.log(`  ✅ 找到消息复制按钮（距离 ${closestDistance.toFixed(0)}px）`);
                     console.log(`    aria-label: ${copyButton.getAttribute('aria-label')}`);
-                    console.log(`    title: ${copyButton.getAttribute('title')}`);
-                    console.log(`    class: ${copyButton.className}`);
+                    console.log(`    className: ${copyButton.className.substring(0, 80)}...`);
 
                     // 通过模拟点击获取内容（HTML 格式，然后转换为 Markdown）
                     const copiedContent = await getCopyButtonContent(copyButton, msgElement);
@@ -155,26 +156,7 @@
                         console.log(`  ❌ 复制按钮点击失败，跳过此消息`);
                     }
                 } else {
-                    console.log(`  ❌ 未找到复制按钮，跳过此消息`);
-
-                    // 🔥 显示所有按钮的详细信息（帮助调试）
-                    for (const searchEl of searchElements) {
-                        const allButtons = searchEl.querySelectorAll('button');
-                        if (allButtons.length > 0) {
-                            console.log(`  在 ${searchEl === msgElement ? '消息元素' : '父元素'} 中找到 ${allButtons.length} 个按钮:`);
-                            allButtons.forEach((btn, btnIdx) => {
-                                const ariaLabel = btn.getAttribute('aria-label') || '';
-                                const title = btn.getAttribute('title') || '';
-                                console.log(`    按钮 ${btnIdx + 1}: aria-label="${ariaLabel}", title="${title}"`);
-                            });
-                        }
-                    }
-
-                    // 🔥 检查消息是否包含图片
-                    const hasImage = msgElement.querySelector('img');
-                    if (hasImage) {
-                        console.log(`  ⚠️ 此消息包含图片，可能没有复制按钮`);
-                    }
+                    console.log(`  ❌ 未找到对应的复制按钮，跳过此消息`);
                 }
 
                 // 等待一下，避免过快
@@ -189,9 +171,8 @@
             if (messages.length < messageElements.length) {
                 console.log(`\n⚠️ 有 ${messageElements.length - messages.length} 条消息未能提取`);
                 console.log(`可能原因：`);
-                console.log(`  1. 消息包含图片，没有复制按钮`);
-                console.log(`  2. 复制按钮点击失败或超时`);
-                console.log(`  3. 消息格式特殊，无法识别复制按钮`);
+                console.log(`  1. 复制按钮点击失败或超时`);
+                console.log(`  2. 剪贴板内容获取失败`);
             }
 
             return messages.length > 0 ? messages : null;
