@@ -51,6 +51,10 @@ nav:
     - Overview: browser-extension/overview.md
     - Installation: browser-extension/installation.md
     - Export Modes: browser-extension/export-modes.md
+  - GitHub Action:
+    - Overview: github-action/overview.md
+    - Usage Guide: github-action/usage.md
+    - Configuration: github-action/configuration.md
   - Development:
     - Contributing: development/contributing.md
     - API Reference: development/api-reference.md

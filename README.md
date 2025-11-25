@@ -1,12 +1,27 @@
 # ChatGPT Export Tool
 
-A powerful tool for exporting ChatGPT conversations to [Kelivo](https://github.com/Chevey339/kelivo) and other local applications. Available as both a **browser extension** and a **standalone web-based converter** (no installation required!).
+A powerful tool for exporting ChatGPT conversations to [Kelivo](https://github.com/Chevey339/kelivo) and other local applications. Available as a **browser extension**, **standalone web-based converter** (no installation required!), and **GitHub Action** for automated conversion.
 
 > ⚠️ **Important Note**: For the browser extension, on first use, the browser will prompt for clipboard permissions. The export will fail at this point, which is normal. Please grant the permission, then **click the export button again** to successfully export.
 
 ---
 
-## 📱 Standalone Web Converter (NEW! - No Installation Required)
+## 🤖 GitHub Action (NEW! - Automated Conversion)
+
+**Perfect for automation!** Convert your ChatGPT exports using GitHub Actions - ideal for batch processing and CI/CD workflows.
+
+### Quick Start
+
+1. **Upload conversations.json** to your repository
+2. **Go to Actions tab** → **Convert ChatGPT to Kelivo**
+3. **Run workflow** with the file path
+4. **Download converted files** from the workflow artifacts
+
+[See detailed instructions →](.github/README.md)
+
+---
+
+## 📱 Standalone Web Converter (No Installation Required)
 
 **Perfect for mobile users!** Convert your ChatGPT exports to [Kelivo](https://github.com/Chevey339/kelivo) format directly in your browser - works on phones, tablets, and desktops without any installation.
 

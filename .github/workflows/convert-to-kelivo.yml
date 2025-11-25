@@ -1,0 +1,54 @@
+name: Convert ChatGPT to Kelivo
+
+on:
+  workflow_dispatch:
+    inputs:
+      conversations_file:
+        description: 'Path to conversations.json file (relative to repository root)'
+        required: true
+        default: 'conversations.json'
+      assistant_name:
+        description: 'Assistant name for Kelivo'
+        required: false
+        default: 'ChatGPT Assistant'
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        run: npm install jszip
+      
+      - name: Convert conversations
+        run: node .github/scripts/convert-to-kelivo.js
+        env:
+          CONVERSATIONS_FILE: ${{ github.event.inputs.conversations_file }}
+          ASSISTANT_NAME: ${{ github.event.inputs.assistant_name }}
+      
+      - name: Upload converted files
+        uses: actions/upload-artifact@v4
+        with:
+          name: kelivo-conversations
+          path: output/*.md
+          retention-days: 30
+      
+      - name: Create ZIP archive
+        run: |
+          cd output
+          zip -r ../kelivo-conversations.zip *.md
+      
+      - name: Upload ZIP artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kelivo-conversations-zip
+          path: kelivo-conversations.zip
+          retention-days: 30

@@ -10,6 +10,7 @@ Welcome to the ChatGPT to Kelivo documentation! This project helps you export yo
 
 - 📱 **Standalone Web Converter** - Works on any device, no installation required
 - 🌐 **Browser Extension** - One-click export from ChatGPT conversations
+- 🤖 **GitHub Action** - Automated conversion in CI/CD workflows
 - 🔒 **Privacy-First** - All processing happens locally
 - 🌍 **Multi-Language** - Supports 8 languages
 
@@ -27,15 +28,22 @@ Install the browser extension for one-click exports directly from ChatGPT.
 
 [Get Started with Browser Extension](browser-extension/overview.md){ .md-button }
 
+### Option 3: GitHub Action (Recommended for Automation)
+
+Use GitHub Actions to automate the conversion process for batch processing.
+
+[Get Started with GitHub Action](github-action/overview.md){ .md-button }
+
 ## Quick Comparison
 
-| Feature | Standalone Converter | Browser Extension |
-|---------|---------------------|-------------------|
-| Mobile Support | ✅ Excellent | ❌ Desktop only |
-| Installation | None required | Required |
-| Real-time Export | ❌ | ✅ |
-| Bulk Conversion | ✅ All at once | One at a time |
-| Works Offline | ✅ (after load) | ✅ |
+| Feature | Standalone Converter | Browser Extension | GitHub Action |
+|---------|---------------------|-------------------|---------------|
+| Mobile Support | ✅ Excellent | ❌ Desktop only | N/A |
+| Installation | None required | Required | Repository setup |
+| Real-time Export | ❌ | ✅ | ❌ |
+| Bulk Conversion | ✅ All at once | One at a time | ✅ All at once |
+| Works Offline | ✅ (after load) | ✅ | ❌ |
+| Automation | ❌ | ❌ | ✅ |
 
 ## Getting Started
 
