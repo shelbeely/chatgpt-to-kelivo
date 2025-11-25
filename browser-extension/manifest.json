@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "ChatGPT to Kelivo",
   "version": "1.1.1",
-  "description": "一键导出 ChatGPT 对话到 Kelivo 助手 - 支持长对话完整导出",
+  "description": "One-click export of ChatGPT conversations to Kelivo assistant - Supports complete export of long conversations",
   "permissions": [
     "activeTab",
     "storage",

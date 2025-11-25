@@ -1,10 +1,395 @@
 // ChatGPT to Kelivo - Content Script
-// 在 ChatGPT 页面注入导出按钮
+// Injects export buttons into ChatGPT pages
 
 (function() {
     'use strict';
 
-    // 创建浮动按钮
+    // ========== Internationalization (i18n) System ==========
+    const translations = {
+        en: {
+            exportToKelivo: 'Export to Kelivo',
+            exportAsMD: 'Export as MD',
+            exporting: 'Exporting...',
+            preparingExport: 'Preparing export...',
+            checkingServerStatus: 'Checking server status...',
+            gettingMarkdownContent: 'Getting Markdown content via copy buttons...',
+            generatingMarkdown: 'Generating Markdown...',
+            sendingToKelivo: 'Sending to Kelivo...',
+            loadingAllMessages: 'Loading all messages...',
+            downloadingFile: 'Downloading file...',
+            exportSuccess: '✅ Successfully exported {count} messages to Kelivo!',
+            exportMDSuccess: '✅ Successfully exported {count} messages as MD file!',
+            exportFailed: '❌ Export failed: {error}',
+            noConversationFound: 'No conversation messages found',
+            unableToGetContent: 'Unable to get content via copy buttons, please ensure the page is fully loaded',
+            serverNotRunningTitle: 'Import Server Not Running',
+            serverNotRunningMessage: 'Cannot connect to Kelivo import server, please start the server first',
+            serverNotRunningStepsTitle: 'Steps:',
+            serverNotRunningStep1: 'Double-click to run',
+            serverNotRunningStep2: 'Wait for server to start (will show "Server started")',
+            serverNotRunningStep3: 'Return to this page',
+            serverNotRunningStep4: 'Click the "Export to Kelivo" button again',
+            serverNotRunningTip: '💡 Tip: The server will display a black window when started, please keep it open',
+            okButton: 'OK',
+            kelivoRunningTitle: 'Kelivo Application Is Running',
+            kelivoRunningMessage: 'Please close the Kelivo application first, then try again',
+            kelivoRunningStepsTitle: 'Steps:',
+            kelivoRunningStep1: 'Close the Kelivo application',
+            kelivoRunningStep2: 'Return to this page',
+            kelivoRunningStep3: 'Click the "Export to Kelivo" button again',
+            userRole: 'User',
+            assistantRole: 'Assistant',
+            quote: 'Quote:',
+            conversationTitlePrefix: 'ChatGPT_Conversation',
+            defaultAssistant: 'Default Assistant'
+        },
+        zh: {
+            exportToKelivo: '导出到 Kelivo',
+            exportAsMD: '导出为 MD',
+            exporting: '导出中...',
+            preparingExport: '准备导出...',
+            checkingServerStatus: '检查服务器状态...',
+            gettingMarkdownContent: '通过复制按钮获取 Markdown 格式内容...',
+            generatingMarkdown: '生成 Markdown...',
+            sendingToKelivo: '发送到 Kelivo...',
+            loadingAllMessages: '正在加载所有消息...',
+            downloadingFile: '下载文件...',
+            exportSuccess: '✅ 成功导出 {count} 条消息到 Kelivo！',
+            exportMDSuccess: '✅ 成功导出 {count} 条消息为 MD 文件！',
+            exportFailed: '❌ 导出失败: {error}',
+            noConversationFound: '未找到对话消息',
+            unableToGetContent: '无法通过复制按钮获取内容，请确保页面已完全加载',
+            serverNotRunningTitle: '导入服务器未运行',
+            serverNotRunningMessage: '无法连接到 Kelivo 导入服务器，请先启动服务器',
+            serverNotRunningStepsTitle: '操作步骤：',
+            serverNotRunningStep1: '双击运行',
+            serverNotRunningStep2: '等待服务器启动（会显示"服务器已启动"）',
+            serverNotRunningStep3: '返回此页面',
+            serverNotRunningStep4: '重新点击"导出到 Kelivo"按钮',
+            serverNotRunningTip: '💡 提示：服务器启动后会显示一个黑色窗口，请保持窗口打开状态',
+            okButton: '我知道了',
+            kelivoRunningTitle: 'Kelivo 应用正在运行',
+            kelivoRunningMessage: '请先关闭 Kelivo 应用，然后重试',
+            kelivoRunningStepsTitle: '操作步骤：',
+            kelivoRunningStep1: '关闭 Kelivo 应用',
+            kelivoRunningStep2: '返回此页面',
+            kelivoRunningStep3: '重新点击"导出到 Kelivo"按钮',
+            userRole: '用户',
+            assistantRole: '助手',
+            quote: '引用：',
+            conversationTitlePrefix: 'ChatGPT对话',
+            defaultAssistant: '默认助手'
+        },
+        es: {
+            exportToKelivo: 'Exportar a Kelivo',
+            exportAsMD: 'Exportar como MD',
+            exporting: 'Exportando...',
+            preparingExport: 'Preparando exportación...',
+            checkingServerStatus: 'Verificando estado del servidor...',
+            gettingMarkdownContent: 'Obteniendo contenido Markdown mediante botones de copiar...',
+            generatingMarkdown: 'Generando Markdown...',
+            sendingToKelivo: 'Enviando a Kelivo...',
+            loadingAllMessages: 'Cargando todos los mensajes...',
+            downloadingFile: 'Descargando archivo...',
+            exportSuccess: '✅ ¡{count} mensajes exportados exitosamente a Kelivo!',
+            exportMDSuccess: '✅ ¡{count} mensajes exportados exitosamente como archivo MD!',
+            exportFailed: '❌ Error de exportación: {error}',
+            noConversationFound: 'No se encontraron mensajes de conversación',
+            unableToGetContent: 'No se puede obtener contenido mediante botones de copiar, asegúrese de que la página esté completamente cargada',
+            serverNotRunningTitle: 'Servidor de Importación No Está Ejecutándose',
+            serverNotRunningMessage: 'No se puede conectar al servidor de importación de Kelivo, por favor inicie el servidor primero',
+            serverNotRunningStepsTitle: 'Pasos:',
+            serverNotRunningStep1: 'Doble clic para ejecutar',
+            serverNotRunningStep2: 'Espere a que el servidor inicie (mostrará "Servidor iniciado")',
+            serverNotRunningStep3: 'Regrese a esta página',
+            serverNotRunningStep4: 'Haga clic en el botón "Exportar a Kelivo" nuevamente',
+            serverNotRunningTip: '💡 Consejo: El servidor mostrará una ventana negra cuando se inicie, manténgala abierta',
+            okButton: 'OK',
+            kelivoRunningTitle: 'La Aplicación Kelivo Está Ejecutándose',
+            kelivoRunningMessage: 'Por favor cierre la aplicación Kelivo primero, luego intente nuevamente',
+            kelivoRunningStepsTitle: 'Pasos:',
+            kelivoRunningStep1: 'Cierre la aplicación Kelivo',
+            kelivoRunningStep2: 'Regrese a esta página',
+            kelivoRunningStep3: 'Haga clic en el botón "Exportar a Kelivo" nuevamente',
+            userRole: 'Usuario',
+            assistantRole: 'Asistente',
+            quote: 'Cita:',
+            conversationTitlePrefix: 'Conversación_ChatGPT',
+            defaultAssistant: 'Asistente Predeterminado'
+        },
+        fr: {
+            exportToKelivo: 'Exporter vers Kelivo',
+            exportAsMD: 'Exporter en MD',
+            exporting: 'Exportation...',
+            preparingExport: 'Préparation de l\'exportation...',
+            checkingServerStatus: 'Vérification de l\'état du serveur...',
+            gettingMarkdownContent: 'Obtention du contenu Markdown via les boutons de copie...',
+            generatingMarkdown: 'Génération du Markdown...',
+            sendingToKelivo: 'Envoi vers Kelivo...',
+            loadingAllMessages: 'Chargement de tous les messages...',
+            downloadingFile: 'Téléchargement du fichier...',
+            exportSuccess: '✅ {count} messages exportés avec succès vers Kelivo!',
+            exportMDSuccess: '✅ {count} messages exportés avec succès en fichier MD!',
+            exportFailed: '❌ Échec de l\'exportation: {error}',
+            noConversationFound: 'Aucun message de conversation trouvé',
+            unableToGetContent: 'Impossible d\'obtenir le contenu via les boutons de copie, assurez-vous que la page est entièrement chargée',
+            serverNotRunningTitle: 'Serveur d\'Importation Non Démarré',
+            serverNotRunningMessage: 'Impossible de se connecter au serveur d\'importation Kelivo, veuillez d\'abord démarrer le serveur',
+            serverNotRunningStepsTitle: 'Étapes:',
+            serverNotRunningStep1: 'Double-cliquez pour exécuter',
+            serverNotRunningStep2: 'Attendez que le serveur démarre (affichera "Serveur démarré")',
+            serverNotRunningStep3: 'Retournez à cette page',
+            serverNotRunningStep4: 'Cliquez à nouveau sur le bouton "Exporter vers Kelivo"',
+            serverNotRunningTip: '💡 Conseil: Le serveur affichera une fenêtre noire au démarrage, gardez-la ouverte',
+            okButton: 'OK',
+            kelivoRunningTitle: 'L\'Application Kelivo Est En Cours d\'Exécution',
+            kelivoRunningMessage: 'Veuillez d\'abord fermer l\'application Kelivo, puis réessayez',
+            kelivoRunningStepsTitle: 'Étapes:',
+            kelivoRunningStep1: 'Fermez l\'application Kelivo',
+            kelivoRunningStep2: 'Retournez à cette page',
+            kelivoRunningStep3: 'Cliquez à nouveau sur le bouton "Exporter vers Kelivo"',
+            userRole: 'Utilisateur',
+            assistantRole: 'Assistant',
+            quote: 'Citation:',
+            conversationTitlePrefix: 'Conversation_ChatGPT',
+            defaultAssistant: 'Assistant Par Défaut'
+        },
+        de: {
+            exportToKelivo: 'Nach Kelivo exportieren',
+            exportAsMD: 'Als MD exportieren',
+            exporting: 'Exportiere...',
+            preparingExport: 'Export wird vorbereitet...',
+            checkingServerStatus: 'Serverstatus wird überprüft...',
+            gettingMarkdownContent: 'Markdown-Inhalt über Kopierschaltflächen abrufen...',
+            generatingMarkdown: 'Markdown wird generiert...',
+            sendingToKelivo: 'An Kelivo senden...',
+            loadingAllMessages: 'Alle Nachrichten werden geladen...',
+            downloadingFile: 'Datei wird heruntergeladen...',
+            exportSuccess: '✅ {count} Nachrichten erfolgreich nach Kelivo exportiert!',
+            exportMDSuccess: '✅ {count} Nachrichten erfolgreich als MD-Datei exportiert!',
+            exportFailed: '❌ Export fehlgeschlagen: {error}',
+            noConversationFound: 'Keine Konversationsnachrichten gefunden',
+            unableToGetContent: 'Inhalt konnte nicht über Kopierschaltflächen abgerufen werden, stellen Sie sicher, dass die Seite vollständig geladen ist',
+            serverNotRunningTitle: 'Import-Server Läuft Nicht',
+            serverNotRunningMessage: 'Verbindung zum Kelivo-Import-Server nicht möglich, bitte starten Sie zuerst den Server',
+            serverNotRunningStepsTitle: 'Schritte:',
+            serverNotRunningStep1: 'Doppelklicken zum Ausführen',
+            serverNotRunningStep2: 'Warten Sie, bis der Server startet (zeigt "Server gestartet")',
+            serverNotRunningStep3: 'Kehren Sie zu dieser Seite zurück',
+            serverNotRunningStep4: 'Klicken Sie erneut auf "Nach Kelivo exportieren"',
+            serverNotRunningTip: '💡 Tipp: Der Server zeigt beim Start ein schwarzes Fenster an, lassen Sie es geöffnet',
+            okButton: 'OK',
+            kelivoRunningTitle: 'Kelivo-Anwendung Läuft',
+            kelivoRunningMessage: 'Bitte schließen Sie zuerst die Kelivo-Anwendung und versuchen Sie es erneut',
+            kelivoRunningStepsTitle: 'Schritte:',
+            kelivoRunningStep1: 'Schließen Sie die Kelivo-Anwendung',
+            kelivoRunningStep2: 'Kehren Sie zu dieser Seite zurück',
+            kelivoRunningStep3: 'Klicken Sie erneut auf "Nach Kelivo exportieren"',
+            userRole: 'Benutzer',
+            assistantRole: 'Assistent',
+            quote: 'Zitat:',
+            conversationTitlePrefix: 'ChatGPT_Konversation',
+            defaultAssistant: 'Standardassistent'
+        },
+        'pt-BR': {
+            exportToKelivo: 'Exportar para Kelivo',
+            exportAsMD: 'Exportar como MD',
+            exporting: 'Exportando...',
+            preparingExport: 'Preparando exportação...',
+            checkingServerStatus: 'Verificando status do servidor...',
+            gettingMarkdownContent: 'Obtendo conteúdo Markdown via botões de copiar...',
+            generatingMarkdown: 'Gerando Markdown...',
+            sendingToKelivo: 'Enviando para Kelivo...',
+            loadingAllMessages: 'Carregando todas as mensagens...',
+            downloadingFile: 'Baixando arquivo...',
+            exportSuccess: '✅ {count} mensagens exportadas com sucesso para Kelivo!',
+            exportMDSuccess: '✅ {count} mensagens exportadas com sucesso como arquivo MD!',
+            exportFailed: '❌ Falha na exportação: {error}',
+            noConversationFound: 'Nenhuma mensagem de conversa encontrada',
+            unableToGetContent: 'Não foi possível obter conteúdo via botões de copiar, certifique-se de que a página esteja totalmente carregada',
+            serverNotRunningTitle: 'Servidor de Importação Não Está Executando',
+            serverNotRunningMessage: 'Não é possível conectar ao servidor de importação do Kelivo, por favor inicie o servidor primeiro',
+            serverNotRunningStepsTitle: 'Passos:',
+            serverNotRunningStep1: 'Clique duas vezes para executar',
+            serverNotRunningStep2: 'Aguarde o servidor iniciar (mostrará "Servidor iniciado")',
+            serverNotRunningStep3: 'Retorne a esta página',
+            serverNotRunningStep4: 'Clique novamente no botão "Exportar para Kelivo"',
+            serverNotRunningTip: '💡 Dica: O servidor exibirá uma janela preta quando iniciado, mantenha-a aberta',
+            okButton: 'OK',
+            kelivoRunningTitle: 'Aplicativo Kelivo Está Executando',
+            kelivoRunningMessage: 'Por favor, feche o aplicativo Kelivo primeiro, depois tente novamente',
+            kelivoRunningStepsTitle: 'Passos:',
+            kelivoRunningStep1: 'Feche o aplicativo Kelivo',
+            kelivoRunningStep2: 'Retorne a esta página',
+            kelivoRunningStep3: 'Clique novamente no botão "Exportar para Kelivo"',
+            userRole: 'Usuário',
+            assistantRole: 'Assistente',
+            quote: 'Citação:',
+            conversationTitlePrefix: 'Conversa_ChatGPT',
+            defaultAssistant: 'Assistente Padrão'
+        },
+        ja: {
+            exportToKelivo: 'Kelivoにエクスポート',
+            exportAsMD: 'MDとしてエクスポート',
+            exporting: 'エクスポート中...',
+            preparingExport: 'エクスポートを準備中...',
+            checkingServerStatus: 'サーバー状態を確認中...',
+            gettingMarkdownContent: 'コピーボタンでMarkdownコンテンツを取得中...',
+            generatingMarkdown: 'Markdownを生成中...',
+            sendingToKelivo: 'Kelivoに送信中...',
+            loadingAllMessages: 'すべてのメッセージを読み込み中...',
+            downloadingFile: 'ファイルをダウンロード中...',
+            exportSuccess: '✅ {count}件のメッセージをKelivoに正常にエクスポートしました！',
+            exportMDSuccess: '✅ {count}件のメッセージをMDファイルとして正常にエクスポートしました！',
+            exportFailed: '❌ エクスポート失敗: {error}',
+            noConversationFound: '会話メッセージが見つかりません',
+            unableToGetContent: 'コピーボタンでコンテンツを取得できません。ページが完全に読み込まれていることを確認してください',
+            serverNotRunningTitle: 'インポートサーバーが実行されていません',
+            serverNotRunningMessage: 'Kelivoインポートサーバーに接続できません。最初にサーバーを起動してください',
+            serverNotRunningStepsTitle: '手順:',
+            serverNotRunningStep1: 'ダブルクリックして実行',
+            serverNotRunningStep2: 'サーバーが起動するまで待つ（「サーバー起動」と表示されます）',
+            serverNotRunningStep3: 'このページに戻る',
+            serverNotRunningStep4: '「Kelivoにエクスポート」ボタンを再度クリック',
+            serverNotRunningTip: '💡 ヒント: サーバー起動時に黒いウィンドウが表示されます。開いたままにしてください',
+            okButton: 'OK',
+            kelivoRunningTitle: 'Kelivoアプリケーションが実行中',
+            kelivoRunningMessage: '最初にKelivoアプリケーションを閉じてから、再度お試しください',
+            kelivoRunningStepsTitle: '手順:',
+            kelivoRunningStep1: 'Kelivoアプリケーションを閉じる',
+            kelivoRunningStep2: 'このページに戻る',
+            kelivoRunningStep3: '「Kelivoにエクスポート」ボタンを再度クリック',
+            userRole: 'ユーザー',
+            assistantRole: 'アシスタント',
+            quote: '引用:',
+            conversationTitlePrefix: 'ChatGPT会話',
+            defaultAssistant: 'デフォルトアシスタント'
+        },
+        ko: {
+            exportToKelivo: 'Kelivo로 내보내기',
+            exportAsMD: 'MD로 내보내기',
+            exporting: '내보내는 중...',
+            preparingExport: '내보내기 준비 중...',
+            checkingServerStatus: '서버 상태 확인 중...',
+            gettingMarkdownContent: '복사 버튼으로 Markdown 콘텐츠 가져오는 중...',
+            generatingMarkdown: 'Markdown 생성 중...',
+            sendingToKelivo: 'Kelivo로 전송 중...',
+            loadingAllMessages: '모든 메시지 로딩 중...',
+            downloadingFile: '파일 다운로드 중...',
+            exportSuccess: '✅ {count}개의 메시지가 Kelivo로 성공적으로 내보내졌습니다!',
+            exportMDSuccess: '✅ {count}개의 메시지가 MD 파일로 성공적으로 내보내졌습니다!',
+            exportFailed: '❌ 내보내기 실패: {error}',
+            noConversationFound: '대화 메시지를 찾을 수 없습니다',
+            unableToGetContent: '복사 버튼으로 콘텐츠를 가져올 수 없습니다. 페이지가 완전히 로드되었는지 확인하세요',
+            serverNotRunningTitle: '가져오기 서버가 실행되지 않음',
+            serverNotRunningMessage: 'Kelivo 가져오기 서버에 연결할 수 없습니다. 먼저 서버를 시작하세요',
+            serverNotRunningStepsTitle: '단계:',
+            serverNotRunningStep1: '더블 클릭하여 실행',
+            serverNotRunningStep2: '서버가 시작될 때까지 기다림 ("서버 시작됨" 표시)',
+            serverNotRunningStep3: '이 페이지로 돌아오기',
+            serverNotRunningStep4: '"Kelivo로 내보내기" 버튼을 다시 클릭',
+            serverNotRunningTip: '💡 팁: 서버가 시작되면 검은 창이 표시됩니다. 열어두세요',
+            okButton: '확인',
+            kelivoRunningTitle: 'Kelivo 애플리케이션 실행 중',
+            kelivoRunningMessage: '먼저 Kelivo 애플리케이션을 닫고 다시 시도하세요',
+            kelivoRunningStepsTitle: '단계:',
+            kelivoRunningStep1: 'Kelivo 애플리케이션 닫기',
+            kelivoRunningStep2: '이 페이지로 돌아오기',
+            kelivoRunningStep3: '"Kelivo로 내보내기" 버튼을 다시 클릭',
+            userRole: '사용자',
+            assistantRole: '어시스턴트',
+            quote: '인용:',
+            conversationTitlePrefix: 'ChatGPT대화',
+            defaultAssistant: '기본 어시스턴트'
+        },
+        hi: {
+            exportToKelivo: 'Kelivo में निर्यात करें',
+            exportAsMD: 'MD के रूप में निर्यात करें',
+            exporting: 'निर्यात हो रहा है...',
+            preparingExport: 'निर्यात की तैयारी...',
+            checkingServerStatus: 'सर्वर स्थिति जाँच रहे हैं...',
+            gettingMarkdownContent: 'कॉपी बटन के माध्यम से Markdown सामग्री प्राप्त कर रहे हैं...',
+            generatingMarkdown: 'Markdown उत्पन्न कर रहे हैं...',
+            sendingToKelivo: 'Kelivo को भेज रहे हैं...',
+            loadingAllMessages: 'सभी संदेश लोड हो रहे हैं...',
+            downloadingFile: 'फ़ाइल डाउनलोड हो रही है...',
+            exportSuccess: '✅ {count} संदेश सफलतापूर्वक Kelivo में निर्यात किए गए!',
+            exportMDSuccess: '✅ {count} संदेश सफलतापूर्वक MD फ़ाइल के रूप में निर्यात किए गए!',
+            exportFailed: '❌ निर्यात विफल: {error}',
+            noConversationFound: 'कोई वार्तालाप संदेश नहीं मिला',
+            unableToGetContent: 'कॉपी बटन के माध्यम से सामग्री प्राप्त करने में असमर्थ, कृपया सुनिश्चित करें कि पृष्ठ पूरी तरह से लोड हो गया है',
+            serverNotRunningTitle: 'आयात सर्वर नहीं चल रहा',
+            serverNotRunningMessage: 'Kelivo आयात सर्वर से कनेक्ट नहीं हो सकता, कृपया पहले सर्वर शुरू करें',
+            serverNotRunningStepsTitle: 'चरण:',
+            serverNotRunningStep1: 'चलाने के लिए डबल-क्लिक करें',
+            serverNotRunningStep2: 'सर्वर शुरू होने की प्रतीक्षा करें ("सर्वर शुरू हुआ" दिखाएगा)',
+            serverNotRunningStep3: 'इस पृष्ठ पर वापस आएं',
+            serverNotRunningStep4: '"Kelivo में निर्यात करें" बटन पर फिर से क्लिक करें',
+            serverNotRunningTip: '💡 सुझाव: सर्वर शुरू होने पर एक काली विंडो दिखाई देगी, इसे खुला रखें',
+            okButton: 'ठीक है',
+            kelivoRunningTitle: 'Kelivo एप्लिकेशन चल रहा है',
+            kelivoRunningMessage: 'कृपया पहले Kelivo एप्लिकेशन बंद करें, फिर पुनः प्रयास करें',
+            kelivoRunningStepsTitle: 'चरण:',
+            kelivoRunningStep1: 'Kelivo एप्लिकेशन बंद करें',
+            kelivoRunningStep2: 'इस पृष्ठ पर वापस आएं',
+            kelivoRunningStep3: '"Kelivo में निर्यात करें" बटन पर फिर से क्लिक करें',
+            userRole: 'उपयोगकर्ता',
+            assistantRole: 'सहायक',
+            quote: 'उद्धरण:',
+            conversationTitlePrefix: 'ChatGPT_वार्तालाप',
+            defaultAssistant: 'डिफ़ॉल्ट सहायक'
+        }
+    };
+
+    let currentLanguage = 'en';
+
+    // Get translation for a key
+    function t(key, params = {}) {
+        const lang = translations[currentLanguage] || translations.en;
+        let text = lang[key] || translations.en[key] || key;
+        
+        for (const [param, value] of Object.entries(params)) {
+            text = text.replace(new RegExp(`\\{${param}\\}`, 'g'), value);
+        }
+        
+        return text;
+    }
+
+    // Load language preference from storage
+    function loadLanguagePreference() {
+        chrome.storage.sync.get({ language: 'en' }, (items) => {
+            currentLanguage = items.language;
+            updateButtonLabels();
+        });
+    }
+
+    // Update button labels based on current language
+    function updateButtonLabels() {
+        const kelivoBtn = document.getElementById('kelivo-export-btn');
+        const mdBtn = document.getElementById('kelivo-export-md-btn');
+        
+        if (kelivoBtn) {
+            const span = kelivoBtn.querySelector('span');
+            if (span) span.textContent = t('exportToKelivo');
+        }
+        
+        if (mdBtn) {
+            const span = mdBtn.querySelector('span');
+            if (span) span.textContent = t('exportAsMD');
+        }
+    }
+
+    // Listen for language change messages from popup
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        if (request.action === 'languageChanged') {
+            currentLanguage = request.language;
+            updateButtonLabels();
+        }
+    });
+
+    // ========== End of i18n System ==========
+
+    // Create floating button
     function createExportButton() {
         const button = document.createElement('button');
         button.id = 'kelivo-export-btn';
@@ -14,13 +399,13 @@
                 <polyline points="7 10 12 15 17 10"></polyline>
                 <line x1="12" y1="15" x2="12" y2="3"></line>
             </svg>
-            <span>导出到 Kelivo</span>
+            <span>${t('exportToKelivo')}</span>
         `;
 
         button.onclick = handleExport;
         document.body.appendChild(button);
 
-        // 创建导出MD按钮
+        // Create export MD button
         const mdButton = document.createElement('button');
         mdButton.id = 'kelivo-export-md-btn';
         mdButton.innerHTML = `
@@ -30,75 +415,75 @@
                 <line x1="12" y1="19" x2="12" y2="11"></line>
                 <polyline points="9 14 12 11 15 14"></polyline>
             </svg>
-            <span>导出为 MD</span>
+            <span>${t('exportAsMD')}</span>
         `;
 
         mdButton.onclick = handleExportMD;
         document.body.appendChild(mdButton);
     }
 
-    // 🔥 最终修复版本：使用空间位置关系查找复制按钮
+    // Final fix version: Use spatial position to find copy buttons
     async function extractByClickingCopyButtons() {
-        console.log('🔥 尝试通过复制按钮获取完整内容...');
+        console.log('🔥 Attempting to get complete content via copy buttons...');
 
         try {
-            // 找到所有消息元素
+            // Find all message elements
             const messageElements = document.querySelectorAll('[data-message-author-role]');
-            console.log(`找到 ${messageElements.length} 条消息`);
+            console.log(`Found ${messageElements.length} messages`);
 
             if (messageElements.length === 0) {
-                console.log('❌ 未找到消息元素');
+                console.log('❌ No message elements found');
                 return null;
             }
 
-            // 获取所有页面中的复制按钮
-            // 支持多语言：支持 20+ 种语言的 "复制" 按钮
+            // Get all copy buttons on the page
+            // Multi-language support: supports 20+ language "Copy" buttons
             const copyButtonLabels = [
-                // 英文
+                // English
                 'Copy',
-                // 中文
+                // Chinese (Simplified)
                 '复制',
-                // 日本語
+                // Japanese
                 'コピー',
-                // 한국어
+                // Korean
                 '복사',
-                // Español
+                // Spanish
                 'Copiar',
-                // Français
+                // French
                 'Copier',
-                // Deutsch
+                // German
                 'Kopieren',
-                // Italiano
+                // Italian
                 'Copia',
-                // Português
+                // Portuguese
                 'Copiar',
-                // Русский
+                // Russian
                 'Копировать',
-                // العربية
+                // Arabic
                 'نسخ',
-                // ไทย
+                // Thai
                 'คัดลอก',
-                // Tiếng Việt
+                // Vietnamese
                 'Sao chép',
-                // Bahasa Indonesia
+                // Indonesian
                 'Salin',
-                // Türkçe
+                // Turkish
                 'Kopyala',
-                // Ελληνικά
+                // Greek
                 'Αντιγραφή',
-                // עברית
+                // Hebrew
                 'העתק',
-                // हिन्दी
+                // Hindi
                 'कॉपी करें',
-                // 繁體中文
+                // Chinese (Traditional)
                 '複製',
-                // Українська
+                // Ukrainian
                 'Копіювати',
-                // Polskie
+                // Polish
                 'Kopiuj',
-                // Čeština
+                // Czech
                 'Kopírovat',
-                // Română
+                // Romanian
                 'Copiere'
             ];
 
@@ -106,39 +491,39 @@
                 const ariaLabel = btn.getAttribute('aria-label') || '';
                 return copyButtonLabels.includes(ariaLabel);
             });
-            console.log(`页面中有 ${allCopyButtons.length} 个复制按钮`);
+            console.log(`Found ${allCopyButtons.length} copy buttons on page`);
 
             const messages = [];
 
-            // 为每条消息提取内容
+            // Extract content for each message
             for (let i = 0; i < messageElements.length; i++) {
                 const msgElement = messageElements[i];
                 const role = msgElement.getAttribute('data-message-author-role');
 
-                console.log(`\n处理消息 ${i + 1}/${messageElements.length} [${role}]...`);
+                console.log(`\nProcessing message ${i + 1}/${messageElements.length} [${role}]...`);
 
-                // 🔥 触发鼠标悬停事件，让复制按钮显示出来
+                // Trigger mouse hover event to show copy button
                 msgElement.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
                 msgElement.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
 
-                // 等待一下让按钮显示
+                // Wait for button to appear
                 await new Promise(resolve => setTimeout(resolve, 500));
 
-                // 🔥 关键改进：使用空间位置关系查找复制按钮
-                // 按钮在消息下方，距离 4-62px
+                // Key improvement: Use spatial position to find copy button
+                // Button is below message, distance 4-62px
                 const msgRect = msgElement.getBoundingClientRect();
                 let copyButton = null;
                 let closestDistance = Infinity;
 
-                // 查找消息下方最近的复制按钮
+                // Find the nearest copy button below the message
                 for (const btn of allCopyButtons) {
                     const btnRect = btn.getBoundingClientRect();
 
-                    // 检查按钮是否在消息下方（允许 100px 的误差）
+                    // Check if button is below the message (allow 100px tolerance)
                     if (btnRect.top >= msgRect.bottom - 100) {
                         const distance = btnRect.top - msgRect.bottom;
 
-                        // 找最近的按钮
+                        // Find the closest button
                         if (distance < closestDistance) {
                             closestDistance = distance;
                             copyButton = btn;
@@ -147,65 +532,65 @@
                 }
 
                 if (copyButton) {
-                    console.log(`  ✅ 找到消息复制按钮（距离 ${closestDistance.toFixed(0)}px）`);
+                    console.log(`  ✅ Found message copy button (distance ${closestDistance.toFixed(0)}px)`);
                     console.log(`    aria-label: ${copyButton.getAttribute('aria-label')}`);
                     console.log(`    className: ${copyButton.className.substring(0, 80)}...`);
 
-                    // 通过模拟点击获取内容（HTML 格式，然后转换为 Markdown）
+                    // Get content by simulating click (HTML format, then convert to Markdown)
                     const copiedContent = await getCopyButtonContent(copyButton, msgElement);
 
                     if (copiedContent && copiedContent.markdown && copiedContent.markdown.trim()) {
-                        console.log(`  ✅ 成功获取 Markdown 内容，长度: ${copiedContent.markdown.length}`);
+                        console.log(`  ✅ Successfully got Markdown content, length: ${copiedContent.markdown.length}`);
 
-                        // 🔥 使用转换后的 Markdown 内容
+                        // Use converted Markdown content
                         let content = copiedContent.markdown;
 
                         messages.push({ role, content });
                     } else if (copiedContent && copiedContent.text && copiedContent.text.trim()) {
-                        console.log(`  ⚠️ 只获取到纯文本，长度: ${copiedContent.text.length}`);
+                        console.log(`  ⚠️ Only got plain text, length: ${copiedContent.text.length}`);
 
-                        // 回退到纯文本
+                        // Fall back to plain text
                         let content = copiedContent.text;
 
                         messages.push({ role, content });
                     } else {
-                        console.log(`  ❌ 复制按钮点击失败，跳过此消息`);
+                        console.log(`  ❌ Copy button click failed, skipping this message`);
                     }
                 } else {
-                    console.log(`  ❌ 未找到对应的复制按钮，跳过此消息`);
+                    console.log(`  ❌ No corresponding copy button found, skipping this message`);
                 }
 
-                // 等待一下，避免过快
+                // Wait a bit to avoid going too fast
                 await new Promise(resolve => setTimeout(resolve, 100));
             }
 
-            console.log(`\n=== 提取完成 ===`);
-            console.log(`总消息数: ${messageElements.length}`);
-            console.log(`成功提取: ${messages.length}`);
-            console.log(`失败/跳过: ${messageElements.length - messages.length}`);
+            console.log(`\n=== Extraction complete ===`);
+            console.log(`Total messages: ${messageElements.length}`);
+            console.log(`Successfully extracted: ${messages.length}`);
+            console.log(`Failed/skipped: ${messageElements.length - messages.length}`);
 
             if (messages.length < messageElements.length) {
-                console.log(`\n⚠️ 有 ${messageElements.length - messages.length} 条消息未能提取`);
-                console.log(`可能原因：`);
-                console.log(`  1. 复制按钮点击失败或超时`);
-                console.log(`  2. 剪贴板内容获取失败`);
+                console.log(`\n⚠️ ${messageElements.length - messages.length} messages could not be extracted`);
+                console.log(`Possible reasons:`);
+                console.log(`  1. Copy button click failed or timed out`);
+                console.log(`  2. Failed to get clipboard content`);
             }
 
             return messages.length > 0 ? messages : null;
 
         } catch (error) {
-            console.log('❌ 复制按钮方法失败:', error.message);
+            console.log('❌ Copy button method failed:', error.message);
             return null;
         }
     }
 
-    // 通过复制按钮获取内容（获取 HTML 并转换为 Markdown）
+    // Get content via copy button (get HTML and convert to Markdown)
     async function getCopyButtonContent(button, msgElement) {
         return new Promise((resolve) => {
             let copiedContent = { text: '', html: '', markdown: '' };
             let resolved = false;
 
-            // 方法 1: 尝试直接读取剪贴板
+            // Method 1: Try to read clipboard directly
             const tryReadClipboard = async () => {
                 try {
                     if (navigator.clipboard && navigator.clipboard.readText) {
@@ -215,32 +600,32 @@
                         }
                     }
                 } catch (e) {
-                    // 忽略权限错误
+                    // Ignore permission errors
                 }
                 return null;
             };
 
-            // 方法 2: 监听复制事件，获取 HTML 并转换为 Markdown
+            // Method 2: Listen for copy event, get HTML and convert to Markdown
             const copyListener = (e) => {
                 if (!resolved) {
                     try {
-                        // 获取纯文本
+                        // Get plain text
                         const plainText = e.clipboardData.getData('text/plain');
 
-                        // 🔥 获取 HTML（这是关键！）
+                        // Get HTML (this is the key!)
                         const html = e.clipboardData.getData('text/html');
 
                         if (plainText && plainText.trim()) {
-                            console.log(`    ✅ 通过 copy 事件获取到内容`);
-                            console.log(`      纯文本长度: ${plainText.length}`);
-                            console.log(`      HTML 长度: ${html ? html.length : 0}`);
+                            console.log(`    ✅ Got content via copy event`);
+                            console.log(`      Plain text length: ${plainText.length}`);
+                            console.log(`      HTML length: ${html ? html.length : 0}`);
 
-                            // 🔥 如果有 HTML，转换为 Markdown
+                            // If HTML exists, convert to Markdown
                             let markdown = plainText;
                             if (html && html.trim()) {
-                                console.log(`      🔄 将 HTML 转换为 Markdown...`);
+                                console.log(`      🔄 Converting HTML to Markdown...`);
                                 markdown = convertHtmlToMarkdown(html);
-                                console.log(`      ✅ 转换后的 Markdown 长度: ${markdown.length}`);
+                                console.log(`      ✅ Converted Markdown length: ${markdown.length}`);
                             }
 
                             copiedContent = {
@@ -254,28 +639,28 @@
                             resolve(copiedContent);
                         }
                     } catch (e) {
-                        console.log('    读取剪贴板数据失败:', e.message);
+                        console.log('    Failed to read clipboard data:', e.message);
                     }
                 }
             };
 
             document.addEventListener('copy', copyListener);
 
-            // 方法 3: 尝试多种点击方式
+            // Method 3: Try multiple click methods
             const clickButton = async () => {
                 try {
-                    // 确保按钮可见
+                    // Ensure button is visible
                     button.scrollIntoView({ behavior: 'auto', block: 'nearest' });
 
-                    // 方式 1: 直接点击
+                    // Method 1: Direct click
                     button.click();
                     await new Promise(resolve => setTimeout(resolve, 500));
 
-                    // 检查是否成功
+                    // Check if successful
                     if (!resolved) {
                         let result = await tryReadClipboard();
                         if (result && result.text) {
-                            console.log(`    ✅ 通过剪贴板 API 获取到内容，长度: ${result.text.length}`);
+                            console.log(`    ✅ Got content via clipboard API, length: ${result.text.length}`);
                             resolved = true;
                             document.removeEventListener('copy', copyListener);
                             resolve(result);
@@ -283,17 +668,17 @@
                         }
                     }
 
-                    // 方式 2: 触发鼠标事件
+                    // Method 2: Trigger mouse events
                     if (!resolved) {
                         button.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
                         button.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
                         button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
                         await new Promise(resolve => setTimeout(resolve, 500));
 
-                        // 再次检查
+                        // Check again
                         let result = await tryReadClipboard();
                         if (result && result.text) {
-                            console.log(`    ✅ 通过剪贴板 API 获取到内容，长度: ${result.text.length}`);
+                            console.log(`    ✅ Got content via clipboard API, length: ${result.text.length}`);
                             resolved = true;
                             document.removeEventListener('copy', copyListener);
                             resolve(result);
@@ -302,40 +687,40 @@
                     }
 
                 } catch (e) {
-                    console.log('    点击复制按钮失败:', e.message);
+                    console.log('    Failed to click copy button:', e.message);
                 }
             };
 
-            // 执行点击
+            // Execute click
             clickButton();
 
-            // 超时处理（增加到 3 秒）
+            // Timeout handling (increased to 3 seconds)
             setTimeout(() => {
                 if (!resolved) {
                     resolved = true;
                     document.removeEventListener('copy', copyListener);
-                    console.log('    ⚠️ 复制超时（3秒），未获取到内容');
-                    console.log('    可能原因：');
-                    console.log('      1. 消息包含图片，复制按钮不可用');
-                    console.log('      2. 复制按钮点击失败');
-                    console.log('      3. 网络延迟或页面加载未完成');
+                    console.log('    ⚠️ Copy timeout (3 seconds), no content retrieved');
+                    console.log('    Possible reasons:');
+                    console.log('      1. Message contains images, copy button unavailable');
+                    console.log('      2. Copy button click failed');
+                    console.log('      3. Network delay or page not fully loaded');
                     resolve(copiedContent);
                 }
             }, 3000);
         });
     }
 
-    // 🔥 将 HTML 转换为 Markdown
+    // Convert HTML to Markdown
     function convertHtmlToMarkdown(html) {
-        // 创建一个临时 DOM 元素来解析 HTML
+        // Create a temporary DOM element to parse HTML
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = html;
 
-        // 使用现有的 htmlToMarkdown 函数
+        // Use existing htmlToMarkdown function
         return htmlToMarkdown(tempDiv);
     }
 
-    // 从元素中提取内容（备用方法）
+    // Extract content from element (fallback method)
     function extractContentFromElement(element) {
         const contentSelectors = [
             '.markdown',
@@ -355,148 +740,148 @@
         return element.textContent.trim();
     }
 
-    // 🔥 新方法：使用 MutationObserver 监听 DOM 变化，确保所有内容加载完成
+    // New method: Use MutationObserver to listen for DOM changes, ensure all content is loaded
     async function waitForAllMessagesToLoad() {
-        console.log('🔥 使用 MutationObserver 等待所有消息加载...');
+        console.log('🔥 Using MutationObserver to wait for all messages to load...');
 
         return new Promise((resolve) => {
             let messageCount = 0;
             let stableCount = 0;
-            const maxStableCount = 5; // 连续 5 次不变才认为加载完成
+            const maxStableCount = 5; // Consider loaded after 5 consecutive unchanged checks
 
-            // 获取初始消息数量
+            // Get initial message count
             messageCount = document.querySelectorAll('[data-message-author-role]').length;
-            console.log(`初始消息数量: ${messageCount}`);
+            console.log(`Initial message count: ${messageCount}`);
 
-            // 创建 MutationObserver
+            // Create MutationObserver
             const observer = new MutationObserver(() => {
                 const newCount = document.querySelectorAll('[data-message-author-role]').length;
 
                 if (newCount > messageCount) {
-                    console.log(`检测到新消息: ${messageCount} -> ${newCount}`);
+                    console.log(`Detected new messages: ${messageCount} -> ${newCount}`);
                     messageCount = newCount;
-                    stableCount = 0; // 重置稳定计数
+                    stableCount = 0; // Reset stable count
                 } else {
                     stableCount++;
                 }
 
-                // 如果连续多次没有新消息，认为加载完成
+                // If no new messages for multiple consecutive checks, consider loading complete
                 if (stableCount >= maxStableCount) {
-                    console.log(`✅ 消息数量稳定在 ${messageCount}，停止监听`);
+                    console.log(`✅ Message count stable at ${messageCount}, stopping observation`);
                     observer.disconnect();
                     resolve();
                 }
             });
 
-            // 监听整个 main 元素的变化
+            // Observe changes to the main element
             const main = document.querySelector('main') || document.body;
             observer.observe(main, {
                 childList: true,
                 subtree: true
             });
 
-            // 触发滚动以加载内容
-            console.log('开始滚动以触发内容加载...');
+            // Trigger scroll to load content
+            console.log('Starting scroll to trigger content loading...');
             triggerScrollToLoadContent();
 
-            // 设置超时，最多等待 30 秒
+            // Set timeout, wait up to 30 seconds
             setTimeout(() => {
-                console.log('⚠️ 超时，停止等待');
+                console.log('⚠️ Timeout, stopping wait');
                 observer.disconnect();
                 resolve();
             }, 30000);
         });
     }
 
-    // 触发滚动以加载内容
+    // Trigger scroll to load content
     async function triggerScrollToLoadContent() {
         const main = document.querySelector('main');
         if (!main) return;
 
-        // 快速滚动到底部和顶部多次，触发内容加载
+        // Quickly scroll to bottom and top multiple times to trigger content loading
         for (let i = 0; i < 3; i++) {
-            // 滚动到底部
+            // Scroll to bottom
             main.scrollTop = main.scrollHeight;
             await new Promise(resolve => setTimeout(resolve, 1000));
 
-            // 滚动到顶部
+            // Scroll to top
             main.scrollTop = 0;
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
 
-        // 最后停在中间
+        // Finally stop in the middle
         main.scrollTop = main.scrollHeight / 2;
     }
 
-    // 🔥 改进的滚动方法：逐个滚动到每条消息，确保内容完全加载
+    // Improved scroll method: Scroll to each message one by one to ensure content is fully loaded
     async function scrollToLoadAllMessagesFromBottom() {
-        console.log('🔥 开始逐个滚动加载所有消息内容...');
+        console.log('🔥 Starting to scroll and load all message content one by one...');
 
-        // 先尝试找到所有消息元素
+        // First try to find all message elements
         let messageElements = document.querySelectorAll('[data-message-author-role]');
-        console.log(`找到 ${messageElements.length} 条消息`);
+        console.log(`Found ${messageElements.length} messages`);
 
         if (messageElements.length === 0) {
-            console.log('⚠️ 未找到消息元素，跳过滚动');
+            console.log('⚠️ No message elements found, skipping scroll');
             return;
         }
 
         const messageArray = Array.from(messageElements);
 
-        // 🔥 关键改进：从第一条到最后一条，逐个滚动并等待内容加载
-        console.log('开始逐个滚动每条消息，确保内容完全加载...');
+        // Key improvement: Scroll from first to last, one by one, wait for content to load
+        console.log('Starting to scroll to each message to ensure content is fully loaded...');
 
         for (let i = 0; i < messageArray.length; i++) {
             const message = messageArray[i];
             const role = message.getAttribute('data-message-author-role');
 
-            console.log(`滚动到消息 ${i + 1}/${messageArray.length} [${role}]...`);
+            console.log(`Scrolling to message ${i + 1}/${messageArray.length} [${role}]...`);
 
-            // 滚动到消息中央
+            // Scroll to message center
             message.scrollIntoView({ behavior: 'auto', block: 'center' });
 
-            // 🔥 等待 2 秒，确保内容完全渲染
+            // Wait 2 seconds to ensure content is fully rendered
             await new Promise(resolve => setTimeout(resolve, 2000));
 
-            // 检查内容是否已加载
+            // Check if content is loaded
             const contentEl = message.querySelector('.markdown, .whitespace-pre-wrap, [class*="prose"]');
             if (contentEl) {
                 const contentLength = contentEl.textContent.length;
-                console.log(`  内容长度: ${contentLength} 字符`);
+                console.log(`  Content length: ${contentLength} characters`);
             }
         }
 
-        console.log('✅ 所有消息已滚动完成');
+        console.log('✅ All messages scrolled');
 
-        // 最后滚动到顶部
-        console.log('滚动到顶部...');
+        // Finally scroll to top
+        console.log('Scrolling to top...');
         messageArray[0].scrollIntoView({ behavior: 'auto', block: 'start' });
         await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
-    // 🔥 简化：只使用 scrollIntoView 方法
+    // Simplified: Only use scrollIntoView method
     async function ensureAllMessagesLoaded(progressCallback) {
-        console.log('=== 开始加载所有消息 ===');
+        console.log('=== Starting to load all messages ===');
 
-        // 🔥 使用新的 scrollIntoView 方法
-        if (progressCallback) progressCallback('正在加载所有消息...');
+        // Use new scrollIntoView method
+        if (progressCallback) progressCallback('Loading all messages...');
         await scrollToLoadAllMessagesFromBottom();
 
-        console.log('=== 消息加载完成 ===');
+        console.log('=== Message loading complete ===');
     }
 
-    // 展开所有折叠的内容
+    // Expand all collapsed content
     function expandAllCollapsedContent() {
         let expandedCount = 0;
 
-        // 查找所有按钮
+        // Find all buttons
         const allButtons = document.querySelectorAll('button');
 
         allButtons.forEach(btn => {
             const text = btn.innerText?.toLowerCase() || '';
             const ariaLabel = btn.getAttribute('aria-label')?.toLowerCase() || '';
 
-            // 检查是否是展开/显示更多按钮
+            // Check if it's an expand/show more button
             if (text.includes('展开') || text.includes('expand') ||
                 text.includes('显示更多') || text.includes('show more') ||
                 ariaLabel.includes('展开') || ariaLabel.includes('expand')) {
@@ -504,42 +889,42 @@
                     btn.click();
                     expandedCount++;
                 } catch (e) {
-                    // 忽略点击错误
+                    // Ignore click errors
                 }
             }
         });
 
-        console.log(`展开了 ${expandedCount} 个折叠内容`);
+        console.log(`Expanded ${expandedCount} collapsed content items`);
     }
 
-    // 等待所有消息渲染完成
+    // Wait for all messages to be rendered
     async function waitForMessagesRendered() {
         return new Promise((resolve) => {
-            // 等待一段时间让流式输出完成
+            // Wait for streaming output to complete
             setTimeout(resolve, 2000);
         });
     }
 
-    // 提取对话内容
+    // Extract conversation content
     async function extractConversation(progressCallback) {
-        // 🔥 只使用复制按钮方法获取 Markdown 格式内容
-        if (progressCallback) progressCallback('通过复制按钮获取 Markdown 格式内容...');
+        // Only use copy button method to get Markdown format content
+        if (progressCallback) progressCallback('Getting Markdown content via copy buttons...');
 
-        console.log('🔥 使用复制按钮方法获取 Markdown 格式内容');
+        console.log('🔥 Using copy button method to get Markdown format content');
 
         const copyMessages = await extractByClickingCopyButtons();
 
         if (copyMessages && copyMessages.length > 0) {
-            console.log(`✅ 成功通过复制按钮获取 ${copyMessages.length} 条消息`);
+            console.log(`✅ Successfully got ${copyMessages.length} messages via copy buttons`);
             return copyMessages;
         }
 
-        console.log('❌ 复制按钮方法失败，无法获取内容');
-        throw new Error('无法通过复制按钮获取内容，请确保页面已完全加载');
+        console.log('❌ Copy button method failed, unable to get content');
+        throw new Error('Unable to get content via copy buttons, please ensure the page is fully loaded');
 
         const messages = [];
 
-        // ChatGPT 消息选择器（根据实际页面结构调整）
+        // ChatGPT message selectors (adjust according to actual page structure)
         const selectors = [
             '[data-message-author-role]',
             '.group.w-full',
@@ -557,27 +942,27 @@
         }
 
         if (!messageElements || messageElements.length === 0) {
-            throw new Error('未找到对话消息');
+            throw new Error('No conversation messages found');
         }
 
-        console.log(`使用选择器: ${usedSelector}`);
-        console.log(`找到 ${messageElements.length} 个消息元素`);
+        console.log(`Using selector: ${usedSelector}`);
+        console.log(`Found ${messageElements.length} message elements`);
 
-        // 🔥 改用 for...of 循环，支持 async/await
+        // Changed to for...of loop to support async/await
         const messageArray = Array.from(messageElements);
         for (let index = 0; index < messageArray.length; index++) {
             const element = messageArray[index];
 
-            // 🔥 滚动到当前消息，确保内容完全渲染
+            // Scroll to current message to ensure content is fully rendered
             try {
                 element.scrollIntoView({ behavior: 'auto', block: 'center' });
-                // 🔥 增加等待时间到 2000ms（2 秒），确保内容完全渲染
+                // Increased wait time to 2000ms (2 seconds) to ensure content is fully rendered
                 await new Promise(resolve => setTimeout(resolve, 2000));
             } catch (e) {
-                console.warn(`滚动到消息 ${index + 1} 失败:`, e);
+                console.warn(`Failed to scroll to message ${index + 1}:`, e);
             }
 
-            // 判断角色
+            // Determine role
             let role = 'assistant';
             const roleAttr = element.getAttribute('data-message-author-role');
 
@@ -590,90 +975,90 @@
                 role = 'user';
             }
 
-            console.log(`消息 ${index + 1}: 角色=${role}, roleAttr=${roleAttr}`);
+            console.log(`Message ${index + 1}: role=${role}, roleAttr=${roleAttr}`);
 
-            // 调试：输出元素的 HTML 结构（仅前 500 字符）
-            if (index < 3) {  // 只输出前3个消息的结构
-                console.log(`  HTML 结构预览:`, element.outerHTML.substring(0, 500));
+            // Debug: Output element HTML structure (first 500 characters only)
+            if (index < 3) {  // Only output structure for first 3 messages
+                console.log(`  HTML structure preview:`, element.outerHTML.substring(0, 500));
             }
 
-            // 提取内容 - 优先使用 HTML 转 Markdown 保留格式
+            // Extract content - prioritize HTML to Markdown to preserve formatting
             let content = '';
             let contentElement = null;
             let usedContentSelector = '';
 
-            // 方法1: 优先尝试 markdown 容器（最常见）
+            // Method 1: Try markdown container first (most common)
             const markdownEl = element.querySelector('.markdown, [class*="markdown"]');
             if (markdownEl) {
                 contentElement = markdownEl;
                 usedContentSelector = '.markdown';
-                console.log(`  找到 markdown 容器，子元素数量: ${markdownEl.children.length}`);
+                console.log(`  Found markdown container, child element count: ${markdownEl.children.length}`);
             }
 
-            // 方法2: 尝试 prose 容器
+            // Method 2: Try prose container
             if (!contentElement) {
                 const proseEl = element.querySelector('[class*="prose"]');
                 if (proseEl) {
                     contentElement = proseEl;
                     usedContentSelector = '[class*="prose"]';
-                    console.log(`  找到 prose 容器，子元素数量: ${proseEl.children.length}`);
+                    console.log(`  Found prose container, child element count: ${proseEl.children.length}`);
                 }
             }
 
-            // 方法3: 尝试 whitespace-pre-wrap
+            // Method 3: Try whitespace-pre-wrap
             if (!contentElement) {
                 const preWrapEl = element.querySelector('.whitespace-pre-wrap');
                 if (preWrapEl) {
                     contentElement = preWrapEl;
                     usedContentSelector = '.whitespace-pre-wrap';
-                    console.log(`  找到 whitespace-pre-wrap 容器，子元素数量: ${preWrapEl.children.length}`);
+                    console.log(`  Found whitespace-pre-wrap container, child element count: ${preWrapEl.children.length}`);
                 }
             }
 
-            // 方法4: 查找 article 或主要内容容器
+            // Method 4: Find article or main content container
             if (!contentElement) {
                 const articleEl = element.querySelector('article, [class*="message-content"]');
                 if (articleEl) {
                     contentElement = articleEl;
                     usedContentSelector = 'article/message-content';
-                    console.log(`  找到 article 容器，子元素数量: ${articleEl.children.length}`);
+                    console.log(`  Found article container, child element count: ${articleEl.children.length}`);
                 }
             }
 
-            // 方法5: 使用整个元素
+            // Method 5: Use the entire element
             if (!contentElement) {
                 contentElement = element;
                 usedContentSelector = 'element itself';
-                console.log(`  使用整个元素，子元素数量: ${element.children.length}`);
+                console.log(`  Using entire element, child element count: ${element.children.length}`);
             }
 
-            // 调试：输出内容元素的结构
+            // Debug: Output content element structure
             if (index < 3 && contentElement) {
-                console.log(`  内容元素 HTML 预览:`, contentElement.outerHTML.substring(0, 800));
+                console.log(`  Content element HTML preview:`, contentElement.outerHTML.substring(0, 800));
             }
 
-            // 转换 HTML 为 Markdown
+            // Convert HTML to Markdown
             if (contentElement) {
-                const enableDebug = index < 3; // 只对前3条消息启用调试
+                const enableDebug = index < 3; // Only enable debug for first 3 messages
                 if (enableDebug) {
-                    console.log(`  === 开始转换 HTML 为 Markdown (消息 ${index + 1}) ===`);
+                    console.log(`  === Starting HTML to Markdown conversion (message ${index + 1}) ===`);
                 }
                 content = htmlToMarkdown(contentElement, enableDebug);
                 if (enableDebug) {
-                    console.log(`  === 转换完成，Markdown 长度: ${content.length} ===`);
-                    console.log(`  Markdown 预览:\n${content.substring(0, 500)}`);
+                    console.log(`  === Conversion complete, Markdown length: ${content.length} ===`);
+                    console.log(`  Markdown preview:\n${content.substring(0, 500)}`);
                 }
             }
 
-            // 如果 HTML 转换失败，回退到纯文本
+            // If HTML conversion fails, fall back to plain text
             if (!content || content.trim().length === 0) {
                 content = contentElement.innerText?.trim() || contentElement.textContent?.trim() || '';
                 usedContentSelector += ' (fallback to text)';
             }
 
-            // 清理内容：移除可能的按钮文本等噪音
+            // Clean content: remove possible button text and other noise
             if (content) {
-                // 移除常见的按钮文本
+                // Remove common button text
                 const noisePatterns = [
                     /^(Copy code|复制代码|Edit|编辑|Regenerate|重新生成)\s*/gm,
                     /\n(Copy code|复制代码|Edit|编辑|Regenerate|重新生成)\s*$/gm
@@ -686,36 +1071,36 @@
                 content = content.trim();
             }
 
-            console.log(`  内容选择器: ${usedContentSelector}, 内容长度: ${content.length}`);
+            console.log(`  Content selector: ${usedContentSelector}, content length: ${content.length}`);
 
             if (content) {
-                // 过滤掉一些可能的噪音文本
+                // Filter out some possible noise text
                 const isNoise = content.length < 2 ||
                                content.match(/^(ChatGPT|You|复制|Copy|编辑|Edit)$/i);
 
                 if (!isNoise) {
                     messages.push({ role, content });
-                    console.log(`  ✓ 已添加消息 ${messages.length}: ${content.substring(0, 50)}...`);
+                    console.log(`  ✓ Added message ${messages.length}: ${content.substring(0, 50)}...`);
                 } else {
-                    console.log(`  ✗ 跳过噪音文本: ${content}`);
+                    console.log(`  ✗ Skipped noise text: ${content}`);
                 }
 
                 if (progressCallback && (index + 1) % 10 === 0) {
-                    progressCallback(`已提取 ${index + 1}/${messageArray.length} 条消息...`);
+                    progressCallback(`Extracted ${index + 1}/${messageArray.length} messages...`);
                 }
             } else {
-                console.log(`  ✗ 未找到内容`);
+                console.log(`  ✗ No content found`);
             }
-        } // 🔥 改为 for 循环的结束
+        } // End of for loop
 
-        console.log(`成功提取 ${messages.length} 条消息`);
-        console.log('消息详情:', messages.map((m, i) => `${i + 1}. [${m.role}] ${m.content.substring(0, 30)}...`));
+        console.log(`Successfully extracted ${messages.length} messages`);
+        console.log('Message details:', messages.map((m, i) => `${i + 1}. [${m.role}] ${m.content.substring(0, 30)}...`));
         return messages;
     }
 
-    // 获取对话标题
+    // Get conversation title
     function getConversationTitle() {
-        // 方法1: 从侧边栏获取当前激活的对话标题
+        // Method 1: Get current active conversation title from sidebar
         const activeConversation = document.querySelector('nav a[aria-current="page"]');
         if (activeConversation) {
             const titleElement = activeConversation.querySelector('div[class*="truncate"]') ||
@@ -723,58 +1108,58 @@
             if (titleElement && titleElement.innerText.trim()) {
                 const title = titleElement.innerText.trim();
                 if (title.length > 0 && !title.match(/^(New chat|新对话|ChatGPT)$/i)) {
-                    console.log('从侧边栏获取标题:', title);
+                    console.log('Got title from sidebar:', title);
                     return title;
                 }
             }
         }
 
-        // 方法2: 使用页面 meta title
+        // Method 2: Use page meta title
         const metaTitle = document.querySelector('meta[property="og:title"]');
         if (metaTitle && metaTitle.content && metaTitle.content.trim()) {
             const title = metaTitle.content.trim();
             if (title !== 'ChatGPT') {
-                console.log('从 meta 标签获取标题:', title);
+                console.log('Got title from meta tag:', title);
                 return title;
             }
         }
 
-        // 方法3: 使用页面 title
+        // Method 3: Use page title
         if (document.title && document.title.trim() && document.title !== 'ChatGPT') {
-            // 移除 " - ChatGPT" 后缀
+            // Remove " - ChatGPT" suffix
             const title = document.title.replace(/\s*-\s*ChatGPT\s*$/, '').trim();
             if (title.length > 0) {
-                console.log('从页面 title 获取标题:', title);
+                console.log('Got title from page title:', title);
                 return title;
             }
         }
 
-        // 方法4: 从 URL 获取对话 ID 作为标题的一部分
+        // Method 4: Get conversation ID from URL as part of title
         const urlMatch = window.location.pathname.match(/\/c\/([a-zA-Z0-9-]+)/);
         if (urlMatch) {
             const conversationId = urlMatch[1];
             const now = new Date();
             const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
-            const title = `ChatGPT对话_${dateStr}_${conversationId.substring(0, 8)}`;
-            console.log('使用对话ID生成标题:', title);
+            const title = `${t('conversationTitlePrefix')}_${dateStr}_${conversationId.substring(0, 8)}`;
+            console.log('Using conversation ID to generate title:', title);
             return title;
         }
 
-        // 默认标题
+        // Default title
         const now = new Date();
-        const title = `ChatGPT对话_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
-        console.log('使用默认标题:', title);
+        const title = `${t('conversationTitlePrefix')}_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+        console.log('Using default title:', title);
         return title;
     }
 
-    // HTML 转 Markdown 的辅助函数
+    // HTML to Markdown helper function
     function htmlToMarkdown(element, debug = false) {
         if (!element) return '';
 
-        // 克隆元素以避免修改原始 DOM
+        // Clone element to avoid modifying original DOM
         const clone = element.cloneNode(true);
 
-        // 移除不需要的元素（按钮、工具栏等）
+        // Remove unwanted elements (buttons, toolbars, etc.)
         const removeSelectors = [
             'button',
             '[class*="copy"]',
@@ -784,14 +1169,14 @@
         ];
         removeSelectors.forEach(selector => {
             clone.querySelectorAll(selector).forEach(el => {
-                if (debug) console.log(`  移除元素: ${el.tagName} - ${el.className}`);
+                if (debug) console.log(`  Removing element: ${el.tagName} - ${el.className}`);
                 el.remove();
             });
         });
 
         if (debug) {
-            console.log(`  克隆后的元素子节点数量: ${clone.childNodes.length}`);
-            console.log(`  克隆后的元素子元素数量: ${clone.children.length}`);
+            console.log(`  Cloned element child node count: ${clone.childNodes.length}`);
+            console.log(`  Cloned element child element count: ${clone.children.length}`);
         }
 
         let markdown = '';
@@ -809,7 +1194,7 @@
             let result = '';
 
             if (debug && (tag === 'ul' || tag === 'ol' || tag === 'li')) {
-                console.log(`    处理 ${tag} 元素，listLevel=${listLevel}, 子节点数=${node.childNodes.length}`);
+                console.log(`    Processing ${tag} element, listLevel=${listLevel}, child node count=${node.childNodes.length}`);
             }
 
             switch (tag) {
@@ -846,7 +1231,7 @@
                     result = '*' + getTextContent(node) + '*';
                     break;
                 case 'code':
-                    // 行内代码
+                    // Inline code
                     if (node.parentElement.tagName.toLowerCase() !== 'pre') {
                         result = '`' + getTextContent(node) + '`';
                     } else {
@@ -854,7 +1239,7 @@
                     }
                     break;
                 case 'pre':
-                    // 代码块
+                    // Code block
                     const codeEl = node.querySelector('code');
                     if (codeEl) {
                         const language = extractLanguage(codeEl);
@@ -874,14 +1259,14 @@
                     result = '\n' + processListItems(node, tag === 'ol', listLevel, debug) + '\n';
                     break;
                 case 'li':
-                    // 由 processListItems 处理
+                    // Handled by processListItems
                     result = processChildren(node, listLevel);
                     break;
                 case 'blockquote':
-                    // 不使用 > 引用语法，避免与 Kelivo 的角色标记冲突
-                    // 改用缩进或其他方式表示引用
+                    // Don't use > quote syntax to avoid conflict with Kelivo's role markers
+                    // Use indentation or other methods to represent quotes
                     const quoteContent = processChildren(node, listLevel);
-                    result = '\n**引用：**\n' + quoteContent + '\n\n';
+                    result = '\n**' + t('quote') + '**\n' + quoteContent + '\n\n';
                     break;
                 case 'hr':
                     result = '\n---\n\n';
@@ -947,56 +1332,56 @@
             );
 
             if (debug) {
-                console.log(`    processListItems: 找到 ${items.length} 个 li 元素, listLevel=${listLevel}`);
+                console.log(`    processListItems: found ${items.length} li elements, listLevel=${listLevel}`);
             }
 
             items.forEach((li, liIndex) => {
                 if (debug) {
-                    console.log(`      处理 li ${liIndex + 1}/${items.length}, 子节点数=${li.childNodes.length}`);
-                    console.log(`      li HTML 预览: ${li.outerHTML.substring(0, 200)}`);
+                    console.log(`      Processing li ${liIndex + 1}/${items.length}, child node count=${li.childNodes.length}`);
+                    console.log(`      li HTML preview: ${li.outerHTML.substring(0, 200)}`);
                 }
 
-                // 🔥 修复：使用更多空格确保 Kelivo 正确识别嵌套列表
-                // 第一级：3 个空格（* 标记）
-                // 第二级：5 个空格（缩进）
-                // 第三级及以上：每级增加 2 个空格
+                // Fix: Use more spaces to ensure Kelivo correctly recognizes nested lists
+                // Level 1: 3 spaces (* marker)
+                // Level 2: 5 spaces (indented)
+                // Level 3+: Add 2 spaces per level
                 let indent = '';
                 if (listLevel === 0) {
                     indent = '';
                 } else if (listLevel === 1) {
-                    indent = '     '; // 5 个空格
+                    indent = '     '; // 5 spaces
                 } else {
-                    indent = '     ' + '  '.repeat(listLevel - 1); // 5 + 2*(level-1) 个空格
+                    indent = '     ' + '  '.repeat(listLevel - 1); // 5 + 2*(level-1) spaces
                 }
                 const marker = isOrdered ? `${index}. ` : '* ';
 
-                // 直接处理 li 的内容，不增加 listLevel
-                // 这样可以保留完整的格式
+                // Process li content directly without increasing listLevel
+                // This preserves the complete format
                 let content = '';
                 let hasNestedList = false;
 
-                // 遍历 li 的所有子节点
+                // Iterate through all child nodes of li
                 for (const child of li.childNodes) {
                     if (child.nodeType === Node.TEXT_NODE) {
                         const text = child.textContent;
                         if (debug && text.trim()) {
-                            console.log(`        文本节点: "${text.trim().substring(0, 50)}"`);
+                            console.log(`        Text node: "${text.trim().substring(0, 50)}"`);
                         }
                         content += text;
                     } else if (child.nodeType === Node.ELEMENT_NODE) {
                         const tag = child.tagName.toLowerCase();
 
                         if (debug) {
-                            console.log(`        元素节点: <${tag}>`);
+                            console.log(`        Element node: <${tag}>`);
                         }
 
-                        // 对于嵌套列表，递归处理
+                        // For nested lists, process recursively
                         if (tag === 'ul' || tag === 'ol') {
                             hasNestedList = true;
-                            // 🔥 嵌套列表需要额外的换行和缩进
+                            // Nested lists need extra newline and indentation
                             content += '\n' + processListItems(child, tag === 'ol', listLevel + 1, debug);
                         } else {
-                            // 其他元素正常处理
+                            // Other elements processed normally
                             content += processNode(child, listLevel, debug);
                         }
                     }
@@ -1005,32 +1390,32 @@
                 content = content.trim();
 
                 if (debug) {
-                    console.log(`      li 内容长度: ${content.length}, 预览: "${content.substring(0, 100)}"`);
+                    console.log(`      li content length: ${content.length}, preview: "${content.substring(0, 100)}"`);
                 }
 
-                // 处理多行内容
+                // Handle multi-line content
                 const lines = content.split('\n');
                 if (lines.length > 0 && lines[0].trim()) {
-                    // 第一行加上列表标记
+                    // First line with list marker
                     result += indent + marker + lines[0].trim() + '\n';
 
-                    // 后续行缩进对齐（如果有嵌套列表，保持原有缩进）
+                    // Subsequent lines aligned (if nested list, keep original indentation)
                     for (let i = 1; i < lines.length; i++) {
                         const line = lines[i];
                         if (line.trim()) {
-                            // 如果这一行已经有缩进（嵌套列表），保持原有缩进
+                            // If this line already has indentation (nested list), keep original indentation
                             if (line.match(/^\s+[*\-\d]/)) {
-                                // 这是嵌套列表项，保持原有缩进
+                                // This is a nested list item, keep original indentation
                                 result += indent + '  ' + line + '\n';
                             } else {
-                                // 否则添加对齐缩进（与列表标记后的内容对齐）
+                                // Otherwise add alignment indentation (aligned with content after list marker)
                                 result += indent + '  ' + line.trim() + '\n';
                             }
                         }
                     }
                 } else {
                     if (debug) {
-                        console.log(`      ⚠️ li 内容为空，跳过`);
+                        console.log(`      ⚠️ li content is empty, skipping`);
                     }
                 }
 
@@ -1038,14 +1423,14 @@
             });
 
             if (debug) {
-                console.log(`    processListItems 完成，生成内容长度: ${result.length}`);
+                console.log(`    processListItems complete, generated content length: ${result.length}`);
             }
 
             return result;
         }
 
         function extractLanguage(codeElement) {
-            // 尝试从 class 中提取语言
+            // Try to extract language from class
             const classes = codeElement.className.split(' ');
             for (const cls of classes) {
                 if (cls.startsWith('language-')) {
@@ -1068,7 +1453,7 @@
                 const cells = Array.from(row.querySelectorAll('th, td'));
                 result += '| ' + cells.map(cell => getTextContent(cell).trim()).join(' | ') + ' |\n';
 
-                // 添加表头分隔符
+                // Add header separator
                 if (rowIndex === 0) {
                     result += '| ' + cells.map(() => '---').join(' | ') + ' |\n';
                 }
@@ -1079,35 +1464,35 @@
 
         markdown = processNode(clone, 0, debug);
 
-        // 清理多余的空行
+        // Clean up extra blank lines
         markdown = markdown.replace(/\n{3,}/g, '\n\n');
 
         if (debug) {
-            console.log(`  最终 Markdown 长度: ${markdown.length}`);
+            console.log(`  Final Markdown length: ${markdown.length}`);
         }
 
         return markdown.trim();
     }
 
-    // 生成 Markdown（符合 Kelivo 导入格式）
+    // Generate Markdown (conforming to Kelivo import format)
     function generateMarkdown(messages, title) {
         let markdown = `# ${title}\n\n`;
 
         messages.forEach((msg, index) => {
-            const roleLabel = msg.role === 'user' ? '用户' : '助手';
+            const roleLabel = msg.role === 'user' ? t('userRole') : t('assistantRole');
 
-            // 🔥 处理消息内容中的引用，避免与角色标记冲突
+            // Process quotes in message content to avoid conflict with role markers
             let content = msg.content;
 
-            // 将 Markdown 引用 (> text) 转换为缩进格式
-            // 使用 4 个空格缩进来表示引用内容
+            // Convert Markdown quotes (> text) to indented format
+            // Use 4 spaces indentation to represent quoted content
             const lines = content.split('\n');
             const processedLines = [];
 
             for (let i = 0; i < lines.length; i++) {
                 const line = lines[i];
                 if (line.trim().startsWith('>')) {
-                    // 移除 > 符号，添加 4 个空格缩进
+                    // Remove > symbol, add 4 space indentation
                     const quotedText = line.replace(/^>\s*/, '');
                     processedLines.push(`    ${quotedText}`);
                 } else {
@@ -1117,15 +1502,15 @@
 
             content = processedLines.join('\n');
 
-            // 使用 > 标记角色（Kelivo 导入格式要求）
+            // Use > to mark role (Kelivo import format requirement)
             markdown += `> ${roleLabel}\n\n${content}\n\n`;
         });
 
         return markdown;
     }
 
-    // 显示加载状态
-    function showLoading(show, message = '导出中...', isMD = false) {
+    // Show loading state
+    function showLoading(show, message = null, isMD = false) {
         const buttonId = isMD ? 'kelivo-export-md-btn' : 'kelivo-export-btn';
         const button = document.getElementById(buttonId);
         if (!button) return;
@@ -1134,7 +1519,7 @@
             button.disabled = true;
             button.innerHTML = `
                 <div class="spinner"></div>
-                <span>${message}</span>
+                <span>${message || t('exporting')}</span>
             `;
         } else {
             button.disabled = false;
@@ -1146,7 +1531,7 @@
                         <line x1="12" y1="19" x2="12" y2="11"></line>
                         <polyline points="9 14 12 11 15 14"></polyline>
                     </svg>
-                    <span>导出为 MD</span>
+                    <span>${t('exportAsMD')}</span>
                 `;
             } else {
                 button.innerHTML = `
@@ -1155,13 +1540,13 @@
                         <polyline points="7 10 12 15 17 10"></polyline>
                         <line x1="12" y1="15" x2="12" y2="3"></line>
                     </svg>
-                    <span>导出到 Kelivo</span>
+                    <span>${t('exportToKelivo')}</span>
                 `;
             }
         }
     }
 
-    // 显示通知
+    // Show notification
     function showNotification(message, type = 'success') {
         const notification = document.createElement('div');
         notification.className = `kelivo-notification ${type}`;
@@ -1180,30 +1565,30 @@
         }, 3000);
     }
 
-    // 显示服务器未运行的对话框
+    // Show server not running dialog
     function showServerNotRunningDialog() {
         const dialog = document.createElement('div');
         dialog.className = 'kelivo-dialog-overlay';
         dialog.innerHTML = `
             <div class="kelivo-dialog">
                 <div class="kelivo-dialog-icon">🚫</div>
-                <h2 class="kelivo-dialog-title">导入服务器未运行</h2>
-                <p class="kelivo-dialog-message">无法连接到 Kelivo 导入服务器，请先启动服务器</p>
+                <h2 class="kelivo-dialog-title">${t('serverNotRunningTitle')}</h2>
+                <p class="kelivo-dialog-message">${t('serverNotRunningMessage')}</p>
                 <div class="kelivo-dialog-steps">
-                    <h3>操作步骤：</h3>
+                    <h3>${t('serverNotRunningStepsTitle')}</h3>
                     <ol>
-                        <li><strong>双击运行</strong> <code>kelivo_import_server.exe</code></li>
-                        <li>等待服务器启动（会显示"服务器已启动"）</li>
-                        <li>返回此页面</li>
-                        <li>重新点击"导出到 Kelivo"按钮</li>
+                        <li><strong>${t('serverNotRunningStep1')}</strong> <code>kelivo_import_server.exe</code></li>
+                        <li>${t('serverNotRunningStep2')}</li>
+                        <li>${t('serverNotRunningStep3')}</li>
+                        <li>${t('serverNotRunningStep4')}</li>
                     </ol>
                 </div>
                 <div class="kelivo-dialog-note">
-                    <strong>💡 提示：</strong>服务器启动后会显示一个黑色窗口，请保持窗口打开状态
+                    <strong>${t('serverNotRunningTip')}</strong>
                 </div>
                 <div class="kelivo-dialog-buttons">
                     <button class="kelivo-dialog-btn kelivo-dialog-btn-primary">
-                        我知道了
+                        ${t('okButton')}
                     </button>
                 </div>
             </div>
@@ -1211,13 +1596,13 @@
 
         document.body.appendChild(dialog);
 
-        // 添加关闭按钮事件监听
+        // Add close button event listener
         const closeBtn = dialog.querySelector('.kelivo-dialog-btn-primary');
         closeBtn.addEventListener('click', () => {
             dialog.remove();
         });
 
-        // 点击遮罩层也可以关闭
+        // Click on overlay to close
         dialog.addEventListener('click', (e) => {
             if (e.target === dialog) {
                 dialog.remove();
@@ -1225,26 +1610,26 @@
         });
     }
 
-    // 显示 Kelivo 运行中的对话框
+    // Show Kelivo running dialog
     function showKelivoRunningDialog(message) {
         const dialog = document.createElement('div');
         dialog.className = 'kelivo-dialog-overlay';
         dialog.innerHTML = `
             <div class="kelivo-dialog">
                 <div class="kelivo-dialog-icon">⚠️</div>
-                <h2 class="kelivo-dialog-title">Kelivo 应用正在运行</h2>
-                <p class="kelivo-dialog-message">${message || '请先关闭 Kelivo 应用，然后重试'}</p>
+                <h2 class="kelivo-dialog-title">${t('kelivoRunningTitle')}</h2>
+                <p class="kelivo-dialog-message">${message || t('kelivoRunningMessage')}</p>
                 <div class="kelivo-dialog-steps">
-                    <h3>操作步骤：</h3>
+                    <h3>${t('kelivoRunningStepsTitle')}</h3>
                     <ol>
-                        <li>关闭 Kelivo 应用</li>
-                        <li>返回此页面</li>
-                        <li>重新点击"导出到 Kelivo"按钮</li>
+                        <li>${t('kelivoRunningStep1')}</li>
+                        <li>${t('kelivoRunningStep2')}</li>
+                        <li>${t('kelivoRunningStep3')}</li>
                     </ol>
                 </div>
                 <div class="kelivo-dialog-buttons">
                     <button class="kelivo-dialog-btn kelivo-dialog-btn-primary">
-                        我知道了
+                        ${t('okButton')}
                     </button>
                 </div>
             </div>
@@ -1252,13 +1637,13 @@
 
         document.body.appendChild(dialog);
 
-        // 添加关闭按钮事件监听
+        // Add close button event listener
         const closeBtn = dialog.querySelector('.kelivo-dialog-btn-primary');
         closeBtn.addEventListener('click', () => {
             dialog.remove();
         });
 
-        // 点击遮罩层也可以关闭
+        // Click on overlay to close
         dialog.addEventListener('click', (e) => {
             if (e.target === dialog) {
                 dialog.remove();
@@ -1266,49 +1651,49 @@
         });
     }
 
-    // 检查服务器状态
+    // Check server status
     async function checkServerStatus() {
-        console.log('[Content] 开始检查服务器状态...');
+        console.log('[Content] Starting server status check...');
         return new Promise((resolve) => {
             chrome.runtime.sendMessage({
                 action: 'checkServer'
             }, (response) => {
-                console.log('[Content] 收到服务器检查响应:', response);
+                console.log('[Content] Received server check response:', response);
                 if (response && response.success && response.running) {
-                    console.log('[Content] ✅ 服务器正在运行');
+                    console.log('[Content] ✅ Server is running');
                     resolve(true);
                 } else {
-                    console.log('[Content] ❌ 服务器未运行');
+                    console.log('[Content] ❌ Server not running');
                     resolve(false);
                 }
             });
         });
     }
 
-    // 生成带有元数据的 Markdown（用于导出为 MD 文件）
+    // Generate Markdown with metadata (for MD file export)
     function generateMarkdownWithMetadata(messages, title) {
-        // 生成唯一的 topicId
+        // Generate unique topicId
         const now = new Date();
         const timestamp = now.getTime();
         const topicId = `topic_${timestamp}_${Math.random().toString(36).substring(2, 9)}`;
 
-        // 获取助手名称（从 popup 设置中获取，默认为"意图"）
-        const assistantName = '意图';
+        // Get assistant name (from popup settings, default to translated default)
+        const assistantName = t('defaultAssistant');
 
-        // 生成 YAML 前置元数据
+        // Generate YAML front matter
         const yamlMetadata = `---
 assistantName: ${assistantName}
 topicId: ${topicId}
 topicName: ${title}
 ---`;
 
-        // 生成对话内容
+        // Generate conversation content
         let markdown = yamlMetadata + '\n';
 
         messages.forEach((msg, index) => {
-            const roleLabel = msg.role === 'user' ? '🧑‍💻 User' : '🤖 Assistant';
+            const roleLabel = msg.role === 'user' ? `🧑‍💻 ${t('userRole')}` : `🤖 ${t('assistantRole')}`;
 
-            // 处理消息内容中的引用
+            // Process quotes in message content
             let content = msg.content;
             const lines = content.split('\n');
             const processedLines = [];
@@ -1325,39 +1710,39 @@ topicName: ${title}
 
             content = processedLines.join('\n');
 
-            // 使用 ## 标记角色
+            // Use ## to mark role
             markdown += `\n## ${roleLabel}\n\n${content}\n`;
         });
 
         return markdown;
     }
 
-    // 处理导出为 MD
+    // Handle MD export
     async function handleExportMD() {
         try {
-            showLoading(true, '准备导出...', true);
+            showLoading(true, t('preparingExport'), true);
 
-            // 提取对话（带进度回调）
+            // Extract conversation (with progress callback)
             const messages = await extractConversation((progress) => {
                 showLoading(true, progress, true);
             });
 
             if (messages.length === 0) {
-                throw new Error('未找到对话内容');
+                throw new Error(t('noConversationFound'));
             }
 
-            console.log(`准备导出 ${messages.length} 条消息为 MD`);
-            showLoading(true, '生成 Markdown...', true);
+            console.log(`Preparing to export ${messages.length} messages as MD`);
+            showLoading(true, t('generatingMarkdown'), true);
 
-            // 获取标题
+            // Get title
             const title = getConversationTitle();
 
-            // 生成带元数据的 Markdown
+            // Generate Markdown with metadata
             const markdown = generateMarkdownWithMetadata(messages, title);
 
-            showLoading(true, '下载文件...', true);
+            showLoading(true, t('downloadingFile'), true);
 
-            // 创建 Blob 并下载
+            // Create Blob and download
             const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -1368,22 +1753,22 @@ topicName: ${title}
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
 
-            showLoading(false, '导出中...', true);
-            showNotification(`✅ 成功导出 ${messages.length} 条消息为 MD 文件！`, 'success');
+            showLoading(false, null, true);
+            showNotification(t('exportMDSuccess', { count: messages.length }), 'success');
 
         } catch (error) {
-            showLoading(false, '导出中...', true);
-            console.error('导出 MD 错误:', error);
-            showNotification(`❌ 导出失败: ${error.message}`, 'error');
+            showLoading(false, null, true);
+            console.error('MD export error:', error);
+            showNotification(t('exportFailed', { error: error.message }), 'error');
         }
     }
 
-    // 处理导出
+    // Handle export
     async function handleExport() {
         try {
-            showLoading(true, '检查服务器状态...');
+            showLoading(true, t('checkingServerStatus'));
 
-            // 先检查服务器是否运行
+            // Check if server is running
             const serverRunning = await checkServerStatus();
 
             if (!serverRunning) {
@@ -1392,29 +1777,29 @@ topicName: ${title}
                 return;
             }
 
-            showLoading(true, '准备导出...');
+            showLoading(true, t('preparingExport'));
 
-            // 提取对话（带进度回调）
+            // Extract conversation (with progress callback)
             const messages = await extractConversation((progress) => {
                 showLoading(true, progress);
             });
 
             if (messages.length === 0) {
-                throw new Error('未找到对话内容');
+                throw new Error(t('noConversationFound'));
             }
 
-            console.log(`准备导出 ${messages.length} 条消息`);
-            showLoading(true, '生成 Markdown...');
+            console.log(`Preparing to export ${messages.length} messages`);
+            showLoading(true, t('generatingMarkdown'));
 
-            // 获取标题
+            // Get title
             const title = getConversationTitle();
 
-            // 生成 Markdown
+            // Generate Markdown
             const markdown = generateMarkdown(messages, title);
 
-            showLoading(true, '发送到 Kelivo...');
+            showLoading(true, t('sendingToKelivo'));
 
-            // 发送到 background script
+            // Send to background script
             chrome.runtime.sendMessage({
                 action: 'exportToKelivo',
                 data: {
@@ -1426,11 +1811,11 @@ topicName: ${title}
                 showLoading(false);
 
                 if (response && response.success) {
-                    showNotification(`✅ 成功导出 ${messages.length} 条消息到 Kelivo！`, 'success');
+                    showNotification(t('exportSuccess', { count: messages.length }), 'success');
                 } else {
-                    const errorMsg = response?.error || '导出失败';
+                    const errorMsg = response?.error || t('exportFailed', { error: 'Unknown error' });
 
-                    // 检查是否是 Kelivo 运行中的错误
+                    // Check if it's a Kelivo running error
                     if (errorMsg.startsWith('KELIVO_RUNNING:')) {
                         const message = errorMsg.replace('KELIVO_RUNNING:', '');
                         showKelivoRunningDialog(message);
@@ -1442,14 +1827,17 @@ topicName: ${title}
 
         } catch (error) {
             showLoading(false);
-            console.error('导出错误:', error);
-            showNotification(`❌ 导出失败: ${error.message}`, 'error');
+            console.error('Export error:', error);
+            showNotification(t('exportFailed', { error: error.message }), 'error');
         }
     }
 
-    // 初始化
+    // Initialize
     function init() {
-        // 等待页面加载完成
+        // Load language preference first
+        loadLanguagePreference();
+        
+        // Wait for page to load
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', createExportButton);
         } else {
