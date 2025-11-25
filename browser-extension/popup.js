@@ -3,7 +3,7 @@
 // Load configuration
 function loadConfig() {
     chrome.storage.sync.get({
-        defaultAssistant: t('defaultAssistant'),
+        defaultAssistant: 'Default Assistant',
         serverUrl: 'http://localhost:8765',
         language: 'en'
     }, (items) => {

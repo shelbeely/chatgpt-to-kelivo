@@ -33,13 +33,15 @@
             okButton: 'OK',
             kelivoRunningTitle: 'Kelivo Application Is Running',
             kelivoRunningMessage: 'Please close the Kelivo application first, then try again',
+            kelivoRunningStepsTitle: 'Steps:',
             kelivoRunningStep1: 'Close the Kelivo application',
             kelivoRunningStep2: 'Return to this page',
             kelivoRunningStep3: 'Click the "Export to Kelivo" button again',
             userRole: 'User',
             assistantRole: 'Assistant',
             quote: 'Quote:',
-            conversationTitlePrefix: 'ChatGPT_Conversation'
+            conversationTitlePrefix: 'ChatGPT_Conversation',
+            defaultAssistant: 'Default Assistant'
         },
         zh: {
             exportToKelivo: '导出到 Kelivo',
@@ -68,13 +70,15 @@
             okButton: '我知道了',
             kelivoRunningTitle: 'Kelivo 应用正在运行',
             kelivoRunningMessage: '请先关闭 Kelivo 应用，然后重试',
+            kelivoRunningStepsTitle: '操作步骤：',
             kelivoRunningStep1: '关闭 Kelivo 应用',
             kelivoRunningStep2: '返回此页面',
             kelivoRunningStep3: '重新点击"导出到 Kelivo"按钮',
             userRole: '用户',
             assistantRole: '助手',
             quote: '引用：',
-            conversationTitlePrefix: 'ChatGPT对话'
+            conversationTitlePrefix: 'ChatGPT对话',
+            defaultAssistant: '默认助手'
         },
         es: {
             exportToKelivo: 'Exportar a Kelivo',
@@ -103,13 +107,15 @@
             okButton: 'OK',
             kelivoRunningTitle: 'La Aplicación Kelivo Está Ejecutándose',
             kelivoRunningMessage: 'Por favor cierre la aplicación Kelivo primero, luego intente nuevamente',
+            kelivoRunningStepsTitle: 'Pasos:',
             kelivoRunningStep1: 'Cierre la aplicación Kelivo',
             kelivoRunningStep2: 'Regrese a esta página',
             kelivoRunningStep3: 'Haga clic en el botón "Exportar a Kelivo" nuevamente',
             userRole: 'Usuario',
             assistantRole: 'Asistente',
             quote: 'Cita:',
-            conversationTitlePrefix: 'Conversación_ChatGPT'
+            conversationTitlePrefix: 'Conversación_ChatGPT',
+            defaultAssistant: 'Asistente Predeterminado'
         },
         fr: {
             exportToKelivo: 'Exporter vers Kelivo',
@@ -138,13 +144,15 @@
             okButton: 'OK',
             kelivoRunningTitle: 'L\'Application Kelivo Est En Cours d\'Exécution',
             kelivoRunningMessage: 'Veuillez d\'abord fermer l\'application Kelivo, puis réessayez',
+            kelivoRunningStepsTitle: 'Étapes:',
             kelivoRunningStep1: 'Fermez l\'application Kelivo',
             kelivoRunningStep2: 'Retournez à cette page',
             kelivoRunningStep3: 'Cliquez à nouveau sur le bouton "Exporter vers Kelivo"',
             userRole: 'Utilisateur',
             assistantRole: 'Assistant',
             quote: 'Citation:',
-            conversationTitlePrefix: 'Conversation_ChatGPT'
+            conversationTitlePrefix: 'Conversation_ChatGPT',
+            defaultAssistant: 'Assistant Par Défaut'
         },
         de: {
             exportToKelivo: 'Nach Kelivo exportieren',
@@ -173,13 +181,15 @@
             okButton: 'OK',
             kelivoRunningTitle: 'Kelivo-Anwendung Läuft',
             kelivoRunningMessage: 'Bitte schließen Sie zuerst die Kelivo-Anwendung und versuchen Sie es erneut',
+            kelivoRunningStepsTitle: 'Schritte:',
             kelivoRunningStep1: 'Schließen Sie die Kelivo-Anwendung',
             kelivoRunningStep2: 'Kehren Sie zu dieser Seite zurück',
             kelivoRunningStep3: 'Klicken Sie erneut auf "Nach Kelivo exportieren"',
             userRole: 'Benutzer',
             assistantRole: 'Assistent',
             quote: 'Zitat:',
-            conversationTitlePrefix: 'ChatGPT_Konversation'
+            conversationTitlePrefix: 'ChatGPT_Konversation',
+            defaultAssistant: 'Standardassistent'
         },
         'pt-BR': {
             exportToKelivo: 'Exportar para Kelivo',
@@ -208,13 +218,15 @@
             okButton: 'OK',
             kelivoRunningTitle: 'Aplicativo Kelivo Está Executando',
             kelivoRunningMessage: 'Por favor, feche o aplicativo Kelivo primeiro, depois tente novamente',
+            kelivoRunningStepsTitle: 'Passos:',
             kelivoRunningStep1: 'Feche o aplicativo Kelivo',
             kelivoRunningStep2: 'Retorne a esta página',
             kelivoRunningStep3: 'Clique novamente no botão "Exportar para Kelivo"',
             userRole: 'Usuário',
             assistantRole: 'Assistente',
             quote: 'Citação:',
-            conversationTitlePrefix: 'Conversa_ChatGPT'
+            conversationTitlePrefix: 'Conversa_ChatGPT',
+            defaultAssistant: 'Assistente Padrão'
         },
         ja: {
             exportToKelivo: 'Kelivoにエクスポート',
@@ -243,13 +255,15 @@
             okButton: 'OK',
             kelivoRunningTitle: 'Kelivoアプリケーションが実行中',
             kelivoRunningMessage: '最初にKelivoアプリケーションを閉じてから、再度お試しください',
+            kelivoRunningStepsTitle: '手順:',
             kelivoRunningStep1: 'Kelivoアプリケーションを閉じる',
             kelivoRunningStep2: 'このページに戻る',
             kelivoRunningStep3: '「Kelivoにエクスポート」ボタンを再度クリック',
             userRole: 'ユーザー',
             assistantRole: 'アシスタント',
             quote: '引用:',
-            conversationTitlePrefix: 'ChatGPT会話'
+            conversationTitlePrefix: 'ChatGPT会話',
+            defaultAssistant: 'デフォルトアシスタント'
         },
         ko: {
             exportToKelivo: 'Kelivo로 내보내기',
@@ -278,13 +292,15 @@
             okButton: '확인',
             kelivoRunningTitle: 'Kelivo 애플리케이션 실행 중',
             kelivoRunningMessage: '먼저 Kelivo 애플리케이션을 닫고 다시 시도하세요',
+            kelivoRunningStepsTitle: '단계:',
             kelivoRunningStep1: 'Kelivo 애플리케이션 닫기',
             kelivoRunningStep2: '이 페이지로 돌아오기',
             kelivoRunningStep3: '"Kelivo로 내보내기" 버튼을 다시 클릭',
             userRole: '사용자',
             assistantRole: '어시스턴트',
             quote: '인용:',
-            conversationTitlePrefix: 'ChatGPT대화'
+            conversationTitlePrefix: 'ChatGPT대화',
+            defaultAssistant: '기본 어시스턴트'
         },
         hi: {
             exportToKelivo: 'Kelivo में निर्यात करें',
@@ -313,13 +329,15 @@
             okButton: 'ठीक है',
             kelivoRunningTitle: 'Kelivo एप्लिकेशन चल रहा है',
             kelivoRunningMessage: 'कृपया पहले Kelivo एप्लिकेशन बंद करें, फिर पुनः प्रयास करें',
+            kelivoRunningStepsTitle: 'चरण:',
             kelivoRunningStep1: 'Kelivo एप्लिकेशन बंद करें',
             kelivoRunningStep2: 'इस पृष्ठ पर वापस आएं',
             kelivoRunningStep3: '"Kelivo में निर्यात करें" बटन पर फिर से क्लिक करें',
             userRole: 'उपयोगकर्ता',
             assistantRole: 'सहायक',
             quote: 'उद्धरण:',
-            conversationTitlePrefix: 'ChatGPT_वार्तालाप'
+            conversationTitlePrefix: 'ChatGPT_वार्तालाप',
+            defaultAssistant: 'डिफ़ॉल्ट सहायक'
         }
     };
 
@@ -1122,14 +1140,14 @@
             const conversationId = urlMatch[1];
             const now = new Date();
             const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
-            const title = `ChatGPT_Conversation_${dateStr}_${conversationId.substring(0, 8)}`;
+            const title = `${t('conversationTitlePrefix')}_${dateStr}_${conversationId.substring(0, 8)}`;
             console.log('Using conversation ID to generate title:', title);
             return title;
         }
 
         // Default title
         const now = new Date();
-        const title = `ChatGPT_Conversation_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+        const title = `${t('conversationTitlePrefix')}_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
         console.log('Using default title:', title);
         return title;
     }
@@ -1248,7 +1266,7 @@
                     // Don't use > quote syntax to avoid conflict with Kelivo's role markers
                     // Use indentation or other methods to represent quotes
                     const quoteContent = processChildren(node, listLevel);
-                    result = '\n**Quote:**\n' + quoteContent + '\n\n';
+                    result = '\n**' + t('quote') + '**\n' + quoteContent + '\n\n';
                     break;
                 case 'hr':
                     result = '\n---\n\n';
@@ -1602,7 +1620,7 @@
                 <h2 class="kelivo-dialog-title">${t('kelivoRunningTitle')}</h2>
                 <p class="kelivo-dialog-message">${message || t('kelivoRunningMessage')}</p>
                 <div class="kelivo-dialog-steps">
-                    <h3>${t('serverNotRunningStepsTitle')}</h3>
+                    <h3>${t('kelivoRunningStepsTitle')}</h3>
                     <ol>
                         <li>${t('kelivoRunningStep1')}</li>
                         <li>${t('kelivoRunningStep2')}</li>
@@ -1659,8 +1677,8 @@
         const timestamp = now.getTime();
         const topicId = `topic_${timestamp}_${Math.random().toString(36).substring(2, 9)}`;
 
-        // Get assistant name (from popup settings, default to "Intent")
-        const assistantName = 'Intent';
+        // Get assistant name (from popup settings, default to translated default)
+        const assistantName = t('defaultAssistant');
 
         // Generate YAML front matter
         const yamlMetadata = `---
