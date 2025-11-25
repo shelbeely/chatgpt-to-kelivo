@@ -4,6 +4,373 @@
 (function() {
     'use strict';
 
+    // ========== Internationalization (i18n) System ==========
+    const translations = {
+        en: {
+            exportToKelivo: 'Export to Kelivo',
+            exportAsMD: 'Export as MD',
+            exporting: 'Exporting...',
+            preparingExport: 'Preparing export...',
+            checkingServerStatus: 'Checking server status...',
+            gettingMarkdownContent: 'Getting Markdown content via copy buttons...',
+            generatingMarkdown: 'Generating Markdown...',
+            sendingToKelivo: 'Sending to Kelivo...',
+            loadingAllMessages: 'Loading all messages...',
+            downloadingFile: 'Downloading file...',
+            exportSuccess: '✅ Successfully exported {count} messages to Kelivo!',
+            exportMDSuccess: '✅ Successfully exported {count} messages as MD file!',
+            exportFailed: '❌ Export failed: {error}',
+            noConversationFound: 'No conversation messages found',
+            unableToGetContent: 'Unable to get content via copy buttons, please ensure the page is fully loaded',
+            serverNotRunningTitle: 'Import Server Not Running',
+            serverNotRunningMessage: 'Cannot connect to Kelivo import server, please start the server first',
+            serverNotRunningStepsTitle: 'Steps:',
+            serverNotRunningStep1: 'Double-click to run',
+            serverNotRunningStep2: 'Wait for server to start (will show "Server started")',
+            serverNotRunningStep3: 'Return to this page',
+            serverNotRunningStep4: 'Click the "Export to Kelivo" button again',
+            serverNotRunningTip: '💡 Tip: The server will display a black window when started, please keep it open',
+            okButton: 'OK',
+            kelivoRunningTitle: 'Kelivo Application Is Running',
+            kelivoRunningMessage: 'Please close the Kelivo application first, then try again',
+            kelivoRunningStep1: 'Close the Kelivo application',
+            kelivoRunningStep2: 'Return to this page',
+            kelivoRunningStep3: 'Click the "Export to Kelivo" button again',
+            userRole: 'User',
+            assistantRole: 'Assistant',
+            quote: 'Quote:',
+            conversationTitlePrefix: 'ChatGPT_Conversation'
+        },
+        zh: {
+            exportToKelivo: '导出到 Kelivo',
+            exportAsMD: '导出为 MD',
+            exporting: '导出中...',
+            preparingExport: '准备导出...',
+            checkingServerStatus: '检查服务器状态...',
+            gettingMarkdownContent: '通过复制按钮获取 Markdown 格式内容...',
+            generatingMarkdown: '生成 Markdown...',
+            sendingToKelivo: '发送到 Kelivo...',
+            loadingAllMessages: '正在加载所有消息...',
+            downloadingFile: '下载文件...',
+            exportSuccess: '✅ 成功导出 {count} 条消息到 Kelivo！',
+            exportMDSuccess: '✅ 成功导出 {count} 条消息为 MD 文件！',
+            exportFailed: '❌ 导出失败: {error}',
+            noConversationFound: '未找到对话消息',
+            unableToGetContent: '无法通过复制按钮获取内容，请确保页面已完全加载',
+            serverNotRunningTitle: '导入服务器未运行',
+            serverNotRunningMessage: '无法连接到 Kelivo 导入服务器，请先启动服务器',
+            serverNotRunningStepsTitle: '操作步骤：',
+            serverNotRunningStep1: '双击运行',
+            serverNotRunningStep2: '等待服务器启动（会显示"服务器已启动"）',
+            serverNotRunningStep3: '返回此页面',
+            serverNotRunningStep4: '重新点击"导出到 Kelivo"按钮',
+            serverNotRunningTip: '💡 提示：服务器启动后会显示一个黑色窗口，请保持窗口打开状态',
+            okButton: '我知道了',
+            kelivoRunningTitle: 'Kelivo 应用正在运行',
+            kelivoRunningMessage: '请先关闭 Kelivo 应用，然后重试',
+            kelivoRunningStep1: '关闭 Kelivo 应用',
+            kelivoRunningStep2: '返回此页面',
+            kelivoRunningStep3: '重新点击"导出到 Kelivo"按钮',
+            userRole: '用户',
+            assistantRole: '助手',
+            quote: '引用：',
+            conversationTitlePrefix: 'ChatGPT对话'
+        },
+        es: {
+            exportToKelivo: 'Exportar a Kelivo',
+            exportAsMD: 'Exportar como MD',
+            exporting: 'Exportando...',
+            preparingExport: 'Preparando exportación...',
+            checkingServerStatus: 'Verificando estado del servidor...',
+            gettingMarkdownContent: 'Obteniendo contenido Markdown mediante botones de copiar...',
+            generatingMarkdown: 'Generando Markdown...',
+            sendingToKelivo: 'Enviando a Kelivo...',
+            loadingAllMessages: 'Cargando todos los mensajes...',
+            downloadingFile: 'Descargando archivo...',
+            exportSuccess: '✅ ¡{count} mensajes exportados exitosamente a Kelivo!',
+            exportMDSuccess: '✅ ¡{count} mensajes exportados exitosamente como archivo MD!',
+            exportFailed: '❌ Error de exportación: {error}',
+            noConversationFound: 'No se encontraron mensajes de conversación',
+            unableToGetContent: 'No se puede obtener contenido mediante botones de copiar, asegúrese de que la página esté completamente cargada',
+            serverNotRunningTitle: 'Servidor de Importación No Está Ejecutándose',
+            serverNotRunningMessage: 'No se puede conectar al servidor de importación de Kelivo, por favor inicie el servidor primero',
+            serverNotRunningStepsTitle: 'Pasos:',
+            serverNotRunningStep1: 'Doble clic para ejecutar',
+            serverNotRunningStep2: 'Espere a que el servidor inicie (mostrará "Servidor iniciado")',
+            serverNotRunningStep3: 'Regrese a esta página',
+            serverNotRunningStep4: 'Haga clic en el botón "Exportar a Kelivo" nuevamente',
+            serverNotRunningTip: '💡 Consejo: El servidor mostrará una ventana negra cuando se inicie, manténgala abierta',
+            okButton: 'OK',
+            kelivoRunningTitle: 'La Aplicación Kelivo Está Ejecutándose',
+            kelivoRunningMessage: 'Por favor cierre la aplicación Kelivo primero, luego intente nuevamente',
+            kelivoRunningStep1: 'Cierre la aplicación Kelivo',
+            kelivoRunningStep2: 'Regrese a esta página',
+            kelivoRunningStep3: 'Haga clic en el botón "Exportar a Kelivo" nuevamente',
+            userRole: 'Usuario',
+            assistantRole: 'Asistente',
+            quote: 'Cita:',
+            conversationTitlePrefix: 'Conversación_ChatGPT'
+        },
+        fr: {
+            exportToKelivo: 'Exporter vers Kelivo',
+            exportAsMD: 'Exporter en MD',
+            exporting: 'Exportation...',
+            preparingExport: 'Préparation de l\'exportation...',
+            checkingServerStatus: 'Vérification de l\'état du serveur...',
+            gettingMarkdownContent: 'Obtention du contenu Markdown via les boutons de copie...',
+            generatingMarkdown: 'Génération du Markdown...',
+            sendingToKelivo: 'Envoi vers Kelivo...',
+            loadingAllMessages: 'Chargement de tous les messages...',
+            downloadingFile: 'Téléchargement du fichier...',
+            exportSuccess: '✅ {count} messages exportés avec succès vers Kelivo!',
+            exportMDSuccess: '✅ {count} messages exportés avec succès en fichier MD!',
+            exportFailed: '❌ Échec de l\'exportation: {error}',
+            noConversationFound: 'Aucun message de conversation trouvé',
+            unableToGetContent: 'Impossible d\'obtenir le contenu via les boutons de copie, assurez-vous que la page est entièrement chargée',
+            serverNotRunningTitle: 'Serveur d\'Importation Non Démarré',
+            serverNotRunningMessage: 'Impossible de se connecter au serveur d\'importation Kelivo, veuillez d\'abord démarrer le serveur',
+            serverNotRunningStepsTitle: 'Étapes:',
+            serverNotRunningStep1: 'Double-cliquez pour exécuter',
+            serverNotRunningStep2: 'Attendez que le serveur démarre (affichera "Serveur démarré")',
+            serverNotRunningStep3: 'Retournez à cette page',
+            serverNotRunningStep4: 'Cliquez à nouveau sur le bouton "Exporter vers Kelivo"',
+            serverNotRunningTip: '💡 Conseil: Le serveur affichera une fenêtre noire au démarrage, gardez-la ouverte',
+            okButton: 'OK',
+            kelivoRunningTitle: 'L\'Application Kelivo Est En Cours d\'Exécution',
+            kelivoRunningMessage: 'Veuillez d\'abord fermer l\'application Kelivo, puis réessayez',
+            kelivoRunningStep1: 'Fermez l\'application Kelivo',
+            kelivoRunningStep2: 'Retournez à cette page',
+            kelivoRunningStep3: 'Cliquez à nouveau sur le bouton "Exporter vers Kelivo"',
+            userRole: 'Utilisateur',
+            assistantRole: 'Assistant',
+            quote: 'Citation:',
+            conversationTitlePrefix: 'Conversation_ChatGPT'
+        },
+        de: {
+            exportToKelivo: 'Nach Kelivo exportieren',
+            exportAsMD: 'Als MD exportieren',
+            exporting: 'Exportiere...',
+            preparingExport: 'Export wird vorbereitet...',
+            checkingServerStatus: 'Serverstatus wird überprüft...',
+            gettingMarkdownContent: 'Markdown-Inhalt über Kopierschaltflächen abrufen...',
+            generatingMarkdown: 'Markdown wird generiert...',
+            sendingToKelivo: 'An Kelivo senden...',
+            loadingAllMessages: 'Alle Nachrichten werden geladen...',
+            downloadingFile: 'Datei wird heruntergeladen...',
+            exportSuccess: '✅ {count} Nachrichten erfolgreich nach Kelivo exportiert!',
+            exportMDSuccess: '✅ {count} Nachrichten erfolgreich als MD-Datei exportiert!',
+            exportFailed: '❌ Export fehlgeschlagen: {error}',
+            noConversationFound: 'Keine Konversationsnachrichten gefunden',
+            unableToGetContent: 'Inhalt konnte nicht über Kopierschaltflächen abgerufen werden, stellen Sie sicher, dass die Seite vollständig geladen ist',
+            serverNotRunningTitle: 'Import-Server Läuft Nicht',
+            serverNotRunningMessage: 'Verbindung zum Kelivo-Import-Server nicht möglich, bitte starten Sie zuerst den Server',
+            serverNotRunningStepsTitle: 'Schritte:',
+            serverNotRunningStep1: 'Doppelklicken zum Ausführen',
+            serverNotRunningStep2: 'Warten Sie, bis der Server startet (zeigt "Server gestartet")',
+            serverNotRunningStep3: 'Kehren Sie zu dieser Seite zurück',
+            serverNotRunningStep4: 'Klicken Sie erneut auf "Nach Kelivo exportieren"',
+            serverNotRunningTip: '💡 Tipp: Der Server zeigt beim Start ein schwarzes Fenster an, lassen Sie es geöffnet',
+            okButton: 'OK',
+            kelivoRunningTitle: 'Kelivo-Anwendung Läuft',
+            kelivoRunningMessage: 'Bitte schließen Sie zuerst die Kelivo-Anwendung und versuchen Sie es erneut',
+            kelivoRunningStep1: 'Schließen Sie die Kelivo-Anwendung',
+            kelivoRunningStep2: 'Kehren Sie zu dieser Seite zurück',
+            kelivoRunningStep3: 'Klicken Sie erneut auf "Nach Kelivo exportieren"',
+            userRole: 'Benutzer',
+            assistantRole: 'Assistent',
+            quote: 'Zitat:',
+            conversationTitlePrefix: 'ChatGPT_Konversation'
+        },
+        'pt-BR': {
+            exportToKelivo: 'Exportar para Kelivo',
+            exportAsMD: 'Exportar como MD',
+            exporting: 'Exportando...',
+            preparingExport: 'Preparando exportação...',
+            checkingServerStatus: 'Verificando status do servidor...',
+            gettingMarkdownContent: 'Obtendo conteúdo Markdown via botões de copiar...',
+            generatingMarkdown: 'Gerando Markdown...',
+            sendingToKelivo: 'Enviando para Kelivo...',
+            loadingAllMessages: 'Carregando todas as mensagens...',
+            downloadingFile: 'Baixando arquivo...',
+            exportSuccess: '✅ {count} mensagens exportadas com sucesso para Kelivo!',
+            exportMDSuccess: '✅ {count} mensagens exportadas com sucesso como arquivo MD!',
+            exportFailed: '❌ Falha na exportação: {error}',
+            noConversationFound: 'Nenhuma mensagem de conversa encontrada',
+            unableToGetContent: 'Não foi possível obter conteúdo via botões de copiar, certifique-se de que a página esteja totalmente carregada',
+            serverNotRunningTitle: 'Servidor de Importação Não Está Executando',
+            serverNotRunningMessage: 'Não é possível conectar ao servidor de importação do Kelivo, por favor inicie o servidor primeiro',
+            serverNotRunningStepsTitle: 'Passos:',
+            serverNotRunningStep1: 'Clique duas vezes para executar',
+            serverNotRunningStep2: 'Aguarde o servidor iniciar (mostrará "Servidor iniciado")',
+            serverNotRunningStep3: 'Retorne a esta página',
+            serverNotRunningStep4: 'Clique novamente no botão "Exportar para Kelivo"',
+            serverNotRunningTip: '💡 Dica: O servidor exibirá uma janela preta quando iniciado, mantenha-a aberta',
+            okButton: 'OK',
+            kelivoRunningTitle: 'Aplicativo Kelivo Está Executando',
+            kelivoRunningMessage: 'Por favor, feche o aplicativo Kelivo primeiro, depois tente novamente',
+            kelivoRunningStep1: 'Feche o aplicativo Kelivo',
+            kelivoRunningStep2: 'Retorne a esta página',
+            kelivoRunningStep3: 'Clique novamente no botão "Exportar para Kelivo"',
+            userRole: 'Usuário',
+            assistantRole: 'Assistente',
+            quote: 'Citação:',
+            conversationTitlePrefix: 'Conversa_ChatGPT'
+        },
+        ja: {
+            exportToKelivo: 'Kelivoにエクスポート',
+            exportAsMD: 'MDとしてエクスポート',
+            exporting: 'エクスポート中...',
+            preparingExport: 'エクスポートを準備中...',
+            checkingServerStatus: 'サーバー状態を確認中...',
+            gettingMarkdownContent: 'コピーボタンでMarkdownコンテンツを取得中...',
+            generatingMarkdown: 'Markdownを生成中...',
+            sendingToKelivo: 'Kelivoに送信中...',
+            loadingAllMessages: 'すべてのメッセージを読み込み中...',
+            downloadingFile: 'ファイルをダウンロード中...',
+            exportSuccess: '✅ {count}件のメッセージをKelivoに正常にエクスポートしました！',
+            exportMDSuccess: '✅ {count}件のメッセージをMDファイルとして正常にエクスポートしました！',
+            exportFailed: '❌ エクスポート失敗: {error}',
+            noConversationFound: '会話メッセージが見つかりません',
+            unableToGetContent: 'コピーボタンでコンテンツを取得できません。ページが完全に読み込まれていることを確認してください',
+            serverNotRunningTitle: 'インポートサーバーが実行されていません',
+            serverNotRunningMessage: 'Kelivoインポートサーバーに接続できません。最初にサーバーを起動してください',
+            serverNotRunningStepsTitle: '手順:',
+            serverNotRunningStep1: 'ダブルクリックして実行',
+            serverNotRunningStep2: 'サーバーが起動するまで待つ（「サーバー起動」と表示されます）',
+            serverNotRunningStep3: 'このページに戻る',
+            serverNotRunningStep4: '「Kelivoにエクスポート」ボタンを再度クリック',
+            serverNotRunningTip: '💡 ヒント: サーバー起動時に黒いウィンドウが表示されます。開いたままにしてください',
+            okButton: 'OK',
+            kelivoRunningTitle: 'Kelivoアプリケーションが実行中',
+            kelivoRunningMessage: '最初にKelivoアプリケーションを閉じてから、再度お試しください',
+            kelivoRunningStep1: 'Kelivoアプリケーションを閉じる',
+            kelivoRunningStep2: 'このページに戻る',
+            kelivoRunningStep3: '「Kelivoにエクスポート」ボタンを再度クリック',
+            userRole: 'ユーザー',
+            assistantRole: 'アシスタント',
+            quote: '引用:',
+            conversationTitlePrefix: 'ChatGPT会話'
+        },
+        ko: {
+            exportToKelivo: 'Kelivo로 내보내기',
+            exportAsMD: 'MD로 내보내기',
+            exporting: '내보내는 중...',
+            preparingExport: '내보내기 준비 중...',
+            checkingServerStatus: '서버 상태 확인 중...',
+            gettingMarkdownContent: '복사 버튼으로 Markdown 콘텐츠 가져오는 중...',
+            generatingMarkdown: 'Markdown 생성 중...',
+            sendingToKelivo: 'Kelivo로 전송 중...',
+            loadingAllMessages: '모든 메시지 로딩 중...',
+            downloadingFile: '파일 다운로드 중...',
+            exportSuccess: '✅ {count}개의 메시지가 Kelivo로 성공적으로 내보내졌습니다!',
+            exportMDSuccess: '✅ {count}개의 메시지가 MD 파일로 성공적으로 내보내졌습니다!',
+            exportFailed: '❌ 내보내기 실패: {error}',
+            noConversationFound: '대화 메시지를 찾을 수 없습니다',
+            unableToGetContent: '복사 버튼으로 콘텐츠를 가져올 수 없습니다. 페이지가 완전히 로드되었는지 확인하세요',
+            serverNotRunningTitle: '가져오기 서버가 실행되지 않음',
+            serverNotRunningMessage: 'Kelivo 가져오기 서버에 연결할 수 없습니다. 먼저 서버를 시작하세요',
+            serverNotRunningStepsTitle: '단계:',
+            serverNotRunningStep1: '더블 클릭하여 실행',
+            serverNotRunningStep2: '서버가 시작될 때까지 기다림 ("서버 시작됨" 표시)',
+            serverNotRunningStep3: '이 페이지로 돌아오기',
+            serverNotRunningStep4: '"Kelivo로 내보내기" 버튼을 다시 클릭',
+            serverNotRunningTip: '💡 팁: 서버가 시작되면 검은 창이 표시됩니다. 열어두세요',
+            okButton: '확인',
+            kelivoRunningTitle: 'Kelivo 애플리케이션 실행 중',
+            kelivoRunningMessage: '먼저 Kelivo 애플리케이션을 닫고 다시 시도하세요',
+            kelivoRunningStep1: 'Kelivo 애플리케이션 닫기',
+            kelivoRunningStep2: '이 페이지로 돌아오기',
+            kelivoRunningStep3: '"Kelivo로 내보내기" 버튼을 다시 클릭',
+            userRole: '사용자',
+            assistantRole: '어시스턴트',
+            quote: '인용:',
+            conversationTitlePrefix: 'ChatGPT대화'
+        },
+        hi: {
+            exportToKelivo: 'Kelivo में निर्यात करें',
+            exportAsMD: 'MD के रूप में निर्यात करें',
+            exporting: 'निर्यात हो रहा है...',
+            preparingExport: 'निर्यात की तैयारी...',
+            checkingServerStatus: 'सर्वर स्थिति जाँच रहे हैं...',
+            gettingMarkdownContent: 'कॉपी बटन के माध्यम से Markdown सामग्री प्राप्त कर रहे हैं...',
+            generatingMarkdown: 'Markdown उत्पन्न कर रहे हैं...',
+            sendingToKelivo: 'Kelivo को भेज रहे हैं...',
+            loadingAllMessages: 'सभी संदेश लोड हो रहे हैं...',
+            downloadingFile: 'फ़ाइल डाउनलोड हो रही है...',
+            exportSuccess: '✅ {count} संदेश सफलतापूर्वक Kelivo में निर्यात किए गए!',
+            exportMDSuccess: '✅ {count} संदेश सफलतापूर्वक MD फ़ाइल के रूप में निर्यात किए गए!',
+            exportFailed: '❌ निर्यात विफल: {error}',
+            noConversationFound: 'कोई वार्तालाप संदेश नहीं मिला',
+            unableToGetContent: 'कॉपी बटन के माध्यम से सामग्री प्राप्त करने में असमर्थ, कृपया सुनिश्चित करें कि पृष्ठ पूरी तरह से लोड हो गया है',
+            serverNotRunningTitle: 'आयात सर्वर नहीं चल रहा',
+            serverNotRunningMessage: 'Kelivo आयात सर्वर से कनेक्ट नहीं हो सकता, कृपया पहले सर्वर शुरू करें',
+            serverNotRunningStepsTitle: 'चरण:',
+            serverNotRunningStep1: 'चलाने के लिए डबल-क्लिक करें',
+            serverNotRunningStep2: 'सर्वर शुरू होने की प्रतीक्षा करें ("सर्वर शुरू हुआ" दिखाएगा)',
+            serverNotRunningStep3: 'इस पृष्ठ पर वापस आएं',
+            serverNotRunningStep4: '"Kelivo में निर्यात करें" बटन पर फिर से क्लिक करें',
+            serverNotRunningTip: '💡 सुझाव: सर्वर शुरू होने पर एक काली विंडो दिखाई देगी, इसे खुला रखें',
+            okButton: 'ठीक है',
+            kelivoRunningTitle: 'Kelivo एप्लिकेशन चल रहा है',
+            kelivoRunningMessage: 'कृपया पहले Kelivo एप्लिकेशन बंद करें, फिर पुनः प्रयास करें',
+            kelivoRunningStep1: 'Kelivo एप्लिकेशन बंद करें',
+            kelivoRunningStep2: 'इस पृष्ठ पर वापस आएं',
+            kelivoRunningStep3: '"Kelivo में निर्यात करें" बटन पर फिर से क्लिक करें',
+            userRole: 'उपयोगकर्ता',
+            assistantRole: 'सहायक',
+            quote: 'उद्धरण:',
+            conversationTitlePrefix: 'ChatGPT_वार्तालाप'
+        }
+    };
+
+    let currentLanguage = 'en';
+
+    // Get translation for a key
+    function t(key, params = {}) {
+        const lang = translations[currentLanguage] || translations.en;
+        let text = lang[key] || translations.en[key] || key;
+        
+        for (const [param, value] of Object.entries(params)) {
+            text = text.replace(new RegExp(`\\{${param}\\}`, 'g'), value);
+        }
+        
+        return text;
+    }
+
+    // Load language preference from storage
+    function loadLanguagePreference() {
+        chrome.storage.sync.get({ language: 'en' }, (items) => {
+            currentLanguage = items.language;
+            updateButtonLabels();
+        });
+    }
+
+    // Update button labels based on current language
+    function updateButtonLabels() {
+        const kelivoBtn = document.getElementById('kelivo-export-btn');
+        const mdBtn = document.getElementById('kelivo-export-md-btn');
+        
+        if (kelivoBtn) {
+            const span = kelivoBtn.querySelector('span');
+            if (span) span.textContent = t('exportToKelivo');
+        }
+        
+        if (mdBtn) {
+            const span = mdBtn.querySelector('span');
+            if (span) span.textContent = t('exportAsMD');
+        }
+    }
+
+    // Listen for language change messages from popup
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        if (request.action === 'languageChanged') {
+            currentLanguage = request.language;
+            updateButtonLabels();
+        }
+    });
+
+    // ========== End of i18n System ==========
+
     // Create floating button
     function createExportButton() {
         const button = document.createElement('button');
@@ -14,7 +381,7 @@
                 <polyline points="7 10 12 15 17 10"></polyline>
                 <line x1="12" y1="15" x2="12" y2="3"></line>
             </svg>
-            <span>Export to Kelivo</span>
+            <span>${t('exportToKelivo')}</span>
         `;
 
         button.onclick = handleExport;
@@ -30,7 +397,7 @@
                 <line x1="12" y1="19" x2="12" y2="11"></line>
                 <polyline points="9 14 12 11 15 14"></polyline>
             </svg>
-            <span>Export as MD</span>
+            <span>${t('exportAsMD')}</span>
         `;
 
         mdButton.onclick = handleExportMD;
@@ -1094,7 +1461,7 @@
         let markdown = `# ${title}\n\n`;
 
         messages.forEach((msg, index) => {
-            const roleLabel = msg.role === 'user' ? 'User' : 'Assistant';
+            const roleLabel = msg.role === 'user' ? t('userRole') : t('assistantRole');
 
             // Process quotes in message content to avoid conflict with role markers
             let content = msg.content;
@@ -1125,7 +1492,7 @@
     }
 
     // Show loading state
-    function showLoading(show, message = 'Exporting...', isMD = false) {
+    function showLoading(show, message = null, isMD = false) {
         const buttonId = isMD ? 'kelivo-export-md-btn' : 'kelivo-export-btn';
         const button = document.getElementById(buttonId);
         if (!button) return;
@@ -1134,7 +1501,7 @@
             button.disabled = true;
             button.innerHTML = `
                 <div class="spinner"></div>
-                <span>${message}</span>
+                <span>${message || t('exporting')}</span>
             `;
         } else {
             button.disabled = false;
@@ -1146,7 +1513,7 @@
                         <line x1="12" y1="19" x2="12" y2="11"></line>
                         <polyline points="9 14 12 11 15 14"></polyline>
                     </svg>
-                    <span>Export as MD</span>
+                    <span>${t('exportAsMD')}</span>
                 `;
             } else {
                 button.innerHTML = `
@@ -1155,7 +1522,7 @@
                         <polyline points="7 10 12 15 17 10"></polyline>
                         <line x1="12" y1="15" x2="12" y2="3"></line>
                     </svg>
-                    <span>Export to Kelivo</span>
+                    <span>${t('exportToKelivo')}</span>
                 `;
             }
         }
@@ -1187,23 +1554,23 @@
         dialog.innerHTML = `
             <div class="kelivo-dialog">
                 <div class="kelivo-dialog-icon">🚫</div>
-                <h2 class="kelivo-dialog-title">Import Server Not Running</h2>
-                <p class="kelivo-dialog-message">Cannot connect to Kelivo import server, please start the server first</p>
+                <h2 class="kelivo-dialog-title">${t('serverNotRunningTitle')}</h2>
+                <p class="kelivo-dialog-message">${t('serverNotRunningMessage')}</p>
                 <div class="kelivo-dialog-steps">
-                    <h3>Steps:</h3>
+                    <h3>${t('serverNotRunningStepsTitle')}</h3>
                     <ol>
-                        <li><strong>Double-click to run</strong> <code>kelivo_import_server.exe</code></li>
-                        <li>Wait for server to start (will show "Server started")</li>
-                        <li>Return to this page</li>
-                        <li>Click the "Export to Kelivo" button again</li>
+                        <li><strong>${t('serverNotRunningStep1')}</strong> <code>kelivo_import_server.exe</code></li>
+                        <li>${t('serverNotRunningStep2')}</li>
+                        <li>${t('serverNotRunningStep3')}</li>
+                        <li>${t('serverNotRunningStep4')}</li>
                     </ol>
                 </div>
                 <div class="kelivo-dialog-note">
-                    <strong>💡 Tip:</strong> The server will display a black window when started, please keep it open
+                    <strong>${t('serverNotRunningTip')}</strong>
                 </div>
                 <div class="kelivo-dialog-buttons">
                     <button class="kelivo-dialog-btn kelivo-dialog-btn-primary">
-                        OK
+                        ${t('okButton')}
                     </button>
                 </div>
             </div>
@@ -1232,19 +1599,19 @@
         dialog.innerHTML = `
             <div class="kelivo-dialog">
                 <div class="kelivo-dialog-icon">⚠️</div>
-                <h2 class="kelivo-dialog-title">Kelivo Application Is Running</h2>
-                <p class="kelivo-dialog-message">${message || 'Please close the Kelivo application first, then try again'}</p>
+                <h2 class="kelivo-dialog-title">${t('kelivoRunningTitle')}</h2>
+                <p class="kelivo-dialog-message">${message || t('kelivoRunningMessage')}</p>
                 <div class="kelivo-dialog-steps">
-                    <h3>Steps:</h3>
+                    <h3>${t('serverNotRunningStepsTitle')}</h3>
                     <ol>
-                        <li>Close the Kelivo application</li>
-                        <li>Return to this page</li>
-                        <li>Click the "Export to Kelivo" button again</li>
+                        <li>${t('kelivoRunningStep1')}</li>
+                        <li>${t('kelivoRunningStep2')}</li>
+                        <li>${t('kelivoRunningStep3')}</li>
                     </ol>
                 </div>
                 <div class="kelivo-dialog-buttons">
                     <button class="kelivo-dialog-btn kelivo-dialog-btn-primary">
-                        OK
+                        ${t('okButton')}
                     </button>
                 </div>
             </div>
@@ -1285,30 +1652,30 @@
         });
     }
 
-    // 生成带有元数据的 Markdown（用于导出为 MD 文件）
+    // Generate Markdown with metadata (for MD file export)
     function generateMarkdownWithMetadata(messages, title) {
-        // 生成唯一的 topicId
+        // Generate unique topicId
         const now = new Date();
         const timestamp = now.getTime();
         const topicId = `topic_${timestamp}_${Math.random().toString(36).substring(2, 9)}`;
 
-        // 获取助手名称（从 popup 设置中获取，默认为"意图"）
-        const assistantName = '意图';
+        // Get assistant name (from popup settings, default to "Intent")
+        const assistantName = 'Intent';
 
-        // 生成 YAML 前置元数据
+        // Generate YAML front matter
         const yamlMetadata = `---
 assistantName: ${assistantName}
 topicId: ${topicId}
 topicName: ${title}
 ---`;
 
-        // 生成对话内容
+        // Generate conversation content
         let markdown = yamlMetadata + '\n';
 
         messages.forEach((msg, index) => {
-            const roleLabel = msg.role === 'user' ? '🧑‍💻 User' : '🤖 Assistant';
+            const roleLabel = msg.role === 'user' ? `🧑‍💻 ${t('userRole')}` : `🤖 ${t('assistantRole')}`;
 
-            // 处理消息内容中的引用
+            // Process quotes in message content
             let content = msg.content;
             const lines = content.split('\n');
             const processedLines = [];
@@ -1325,39 +1692,39 @@ topicName: ${title}
 
             content = processedLines.join('\n');
 
-            // 使用 ## 标记角色
+            // Use ## to mark role
             markdown += `\n## ${roleLabel}\n\n${content}\n`;
         });
 
         return markdown;
     }
 
-    // 处理导出为 MD
+    // Handle MD export
     async function handleExportMD() {
         try {
-            showLoading(true, '准备导出...', true);
+            showLoading(true, t('preparingExport'), true);
 
-            // 提取对话（带进度回调）
+            // Extract conversation (with progress callback)
             const messages = await extractConversation((progress) => {
                 showLoading(true, progress, true);
             });
 
             if (messages.length === 0) {
-                throw new Error('未找到对话内容');
+                throw new Error(t('noConversationFound'));
             }
 
-            console.log(`准备导出 ${messages.length} 条消息为 MD`);
-            showLoading(true, '生成 Markdown...', true);
+            console.log(`Preparing to export ${messages.length} messages as MD`);
+            showLoading(true, t('generatingMarkdown'), true);
 
-            // 获取标题
+            // Get title
             const title = getConversationTitle();
 
-            // 生成带元数据的 Markdown
+            // Generate Markdown with metadata
             const markdown = generateMarkdownWithMetadata(messages, title);
 
-            showLoading(true, '下载文件...', true);
+            showLoading(true, t('downloadingFile'), true);
 
-            // 创建 Blob 并下载
+            // Create Blob and download
             const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -1368,22 +1735,22 @@ topicName: ${title}
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
 
-            showLoading(false, '导出中...', true);
-            showNotification(`✅ 成功导出 ${messages.length} 条消息为 MD 文件！`, 'success');
+            showLoading(false, null, true);
+            showNotification(t('exportMDSuccess', { count: messages.length }), 'success');
 
         } catch (error) {
-            showLoading(false, '导出中...', true);
-            console.error('导出 MD 错误:', error);
-            showNotification(`❌ 导出失败: ${error.message}`, 'error');
+            showLoading(false, null, true);
+            console.error('MD export error:', error);
+            showNotification(t('exportFailed', { error: error.message }), 'error');
         }
     }
 
-    // 处理导出
+    // Handle export
     async function handleExport() {
         try {
-            showLoading(true, '检查服务器状态...');
+            showLoading(true, t('checkingServerStatus'));
 
-            // 先检查服务器是否运行
+            // Check if server is running
             const serverRunning = await checkServerStatus();
 
             if (!serverRunning) {
@@ -1392,29 +1759,29 @@ topicName: ${title}
                 return;
             }
 
-            showLoading(true, '准备导出...');
+            showLoading(true, t('preparingExport'));
 
-            // 提取对话（带进度回调）
+            // Extract conversation (with progress callback)
             const messages = await extractConversation((progress) => {
                 showLoading(true, progress);
             });
 
             if (messages.length === 0) {
-                throw new Error('未找到对话内容');
+                throw new Error(t('noConversationFound'));
             }
 
-            console.log(`准备导出 ${messages.length} 条消息`);
-            showLoading(true, '生成 Markdown...');
+            console.log(`Preparing to export ${messages.length} messages`);
+            showLoading(true, t('generatingMarkdown'));
 
-            // 获取标题
+            // Get title
             const title = getConversationTitle();
 
-            // 生成 Markdown
+            // Generate Markdown
             const markdown = generateMarkdown(messages, title);
 
-            showLoading(true, '发送到 Kelivo...');
+            showLoading(true, t('sendingToKelivo'));
 
-            // 发送到 background script
+            // Send to background script
             chrome.runtime.sendMessage({
                 action: 'exportToKelivo',
                 data: {
@@ -1426,11 +1793,11 @@ topicName: ${title}
                 showLoading(false);
 
                 if (response && response.success) {
-                    showNotification(`✅ 成功导出 ${messages.length} 条消息到 Kelivo！`, 'success');
+                    showNotification(t('exportSuccess', { count: messages.length }), 'success');
                 } else {
-                    const errorMsg = response?.error || '导出失败';
+                    const errorMsg = response?.error || t('exportFailed', { error: 'Unknown error' });
 
-                    // 检查是否是 Kelivo 运行中的错误
+                    // Check if it's a Kelivo running error
                     if (errorMsg.startsWith('KELIVO_RUNNING:')) {
                         const message = errorMsg.replace('KELIVO_RUNNING:', '');
                         showKelivoRunningDialog(message);
@@ -1442,14 +1809,17 @@ topicName: ${title}
 
         } catch (error) {
             showLoading(false);
-            console.error('导出错误:', error);
-            showNotification(`❌ 导出失败: ${error.message}`, 'error');
+            console.error('Export error:', error);
+            showNotification(t('exportFailed', { error: error.message }), 'error');
         }
     }
 
-    // 初始化
+    // Initialize
     function init() {
-        // 等待页面加载完成
+        // Load language preference first
+        loadLanguagePreference();
+        
+        // Wait for page to load
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', createExportButton);
         } else {
