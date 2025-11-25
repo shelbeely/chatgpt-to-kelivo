@@ -1,124 +1,124 @@
-# ChatGPT 导出工具
+# ChatGPT Export Tool
 
-一个强大的浏览器扩展，可以将 ChatGPT 对话导出到多个本地应用。支持三种导出模式，满足不同的使用需求。
+A powerful browser extension that exports ChatGPT conversations to multiple local applications. Supports three export modes to meet different usage needs.
 
-> ⚠️ **重要提示**：首次使用时，浏览器会弹出请求复制权限的提示。此时导出会失败，这是正常现象。请允许权限后，**重新点击导出按钮**即可成功导出。
+> ⚠️ **Important Note**: On first use, the browser will prompt for clipboard permissions. The export will fail at this point, which is normal. Please grant the permission, then **click the export button again** to successfully export.
 
-## � 安装步骤
+## 📦 Installation Steps
 
-### 1. 下载安装包
+### 1. Download the Package
 
-从 [Releases](https://github.com/lyw123www/chatgpt-to-kelivo/releases/tag/v1.1.2) 下载最新版本并解压。
+Download the latest version from [Releases](https://github.com/lyw123www/chatgpt-to-kelivo/releases/tag/v1.1.2) and extract it.
 
-### 2. 安装浏览器扩展
+### 2. Install the Browser Extension
 
-1. 打开 Chrome 浏览器，访问 `chrome://extensions/`
-2. 打开右上角的"开发者模式"
-3. 点击"加载已解压的扩展程序"
-4. 选择 `browser-extension` 文件夹
-5. 扩展安装完成
-6. 点击扩展图标，配置助手名称和服务器地址
+1. Open Chrome browser and navigate to `chrome://extensions/`
+2. Enable "Developer mode" in the top right corner
+3. Click "Load unpacked"
+4. Select the `browser-extension` folder
+5. Extension installation complete
+6. Click the extension icon to configure assistant name and server address
 
-![扩展配置界面](images/image.png)
+![Extension Settings Interface](images/image.png)
 
-7. **填写助手名称**（模式 2 和模式 3 需要用到）
-   - **Kelivo 助手名称**：导出到 Kelivo 时使用的助手名称
-   - **Cherry Studio 助手名称**：导出到 Cherry Studio 时使用的助手名称
-   - 点击"保存设置"完成配置
-
----
-
-## 🎯 三种导出模式
-
-### 模式 1️⃣：导出为 MD 文件（推荐首选）
-
-**使用步骤**：
-1. 打开 ChatGPT 对话
-2. 点击页面右侧的 **🟢 绿色"导出为 MD"按钮**
-3. 文件会自动下载到本地
-
-### 模式 2️⃣：导出到 Kelivo
-
-**前置要求**：
-- 安装 [Kelivo](https://github.com/Chevey339/kelivo) 本地应用
-- 运行 `kelivo_import_server.exe` 启动导入服务器
-
-- ✅ **已在扩展设置中填写 Kelivo 助手名称**（见安装步骤第 7 步）
-
-**使用步骤**：
-1. **启动服务器**：双击运行 `kelivo_import_server.exe`
-
-2. **关闭 Kelivo 应用**：⚠️ 这一步很重要
-
-3. **打开 ChatGPT 对话**：访问 https://chatgpt.com
-
-4. **点击导出按钮**：页面右侧会出现 **🟣 紫色"导出到 Kelivo"按钮**
-
-5. **查看结果**：打开 Kelivo 应用查看导入的对话,可以继续对话
-
-**故障排查**：
-- ❌ 提示"服务器未运行"？→ 检查是否启动了 `kelivo_import_server.exe`
-- ❌ 提示"Kelivo 应用正在运行"？→ 关闭 Kelivo 应用后重试
-- ❌ 导入失败？→ 检查扩展设置中是否正确填写了 Kelivo 助手名称
+7. **Enter Assistant Name** (Required for Mode 2 and Mode 3)
+   - **Kelivo Assistant Name**: The assistant name used when exporting to Kelivo
+   - **Cherry Studio Assistant Name**: The assistant name used when exporting to Cherry Studio
+   - Click "Save Settings" to complete the configuration
 
 ---
 
-### 模式 3️⃣：导出到 Cherry Studio
+## 🎯 Three Export Modes
 
-**前置要求**：
-- 已安装 Cherry Studio
-- 已完成**模式 1**（导出 MD 文件）
-- ✅ **已在扩展设置中填写 Cherry Studio 助手名称**（见安装步骤第 7 步）
+### Mode 1️⃣: Export as MD File (Recommended)
 
-**使用步骤**：
+**Steps**:
+1. Open a ChatGPT conversation
+2. Click the **🟢 green "Export as MD" button** on the right side of the page
+3. The file will automatically download to your local machine
 
-#### 第一步：导出 MD 文件
-按照**模式 1**的步骤导出 MD 文件，记住文件保存位置。
+### Mode 2️⃣: Export to Kelivo
 
-#### 第二步：首次运行 cherry-import.exe（仅需一次）
+**Prerequisites**:
+- Install the [Kelivo](https://github.com/Chevey339/kelivo) local application
+- Run `kelivo_import_server.exe` to start the import server
 
-1. **双击运行 `cherry-import.exe`**
+- ✅ **Kelivo assistant name has been configured in extension settings** (See installation step 7)
 
-2. **填写 Cherry Studio 安装地址**
+**Steps**:
+1. **Start the server**: Double-click to run `kelivo_import_server.exe`
 
-   ![Cherry Studio 安装地址配置](images/image%20copy.png)
+2. **Close the Kelivo application**: ⚠️ This step is important
 
-   - 选择 Cherry Studio 的安装目录
-   - 点击确认
+3. **Open a ChatGPT conversation**: Visit https://chatgpt.com
 
-#### 第三步：再次运行 cherry-import.exe
+4. **Click the export button**: A **🟣 purple "Export to Kelivo" button** will appear on the right side of the page
 
-1. **双击运行 `cherry-import.exe`**
+5. **View the result**: Open the Kelivo application to view the imported conversation and continue chatting
 
-2. **会弹出 ChatGPT 文件夹选择窗口**
-
-   ![ChatGPT 文件夹选择](images/image%20copy%202.png)
-
-3. **选择导出的MD文件粘贴放入 ChatGPT 文件夹**
+**Troubleshooting**:
+- ❌ Getting "Server not running"? → Check if `kelivo_import_server.exe` is running
+- ❌ Getting "Kelivo application is running"? → Close the Kelivo application and try again
+- ❌ Import failed? → Check if the Kelivo assistant name is correctly configured in extension settings
 
 ---
 
-**以下内容会自动运行，你无需操作**：
+### Mode 3️⃣: Export to Cherry Studio
 
-#### 第四步：自动导入和清理
+**Prerequisites**:
+- Cherry Studio is installed
+- Completed **Mode 1** (Export MD file)
+- ✅ **Cherry Studio assistant name has been configured in extension settings** (See installation step 7)
 
-> ⚠️ **重要**：cherry-import.exe 会持续运行在后台
+**Steps**:
 
-**以下内容会自动运行，你无需操作**：
+#### Step 1: Export MD File
+Follow the steps in **Mode 1** to export an MD file, and remember the file save location.
 
-> 📌 **自动工作流程**（无需手动干预）
+#### Step 2: First Run of cherry-import.exe (One-time only)
+
+1. **Double-click to run `cherry-import.exe`**
+
+2. **Enter Cherry Studio installation path**
+
+   ![Cherry Studio Installation Path Configuration](images/image%20copy.png)
+
+   - Select the Cherry Studio installation directory
+   - Click Confirm
+
+#### Step 3: Run cherry-import.exe Again
+
+1. **Double-click to run `cherry-import.exe`**
+
+2. **A ChatGPT folder selection window will appear**
+
+   ![ChatGPT Folder Selection](images/image%20copy%202.png)
+
+3. **Paste the exported MD files into the ChatGPT folder**
+
+---
+
+**The following will run automatically, no action required**:
+
+#### Step 4: Automatic Import and Cleanup
+
+> ⚠️ **Important**: cherry-import.exe will continue running in the background
+
+**The following will run automatically, no action required**:
+
+> 📌 **Automatic Workflow** (No manual intervention needed)
 >
-> 1. **持续监控 ChatGPT 文件夹**
->    - cherry-import.exe 会一直在后台运行
->    - 实时监控指定的 ChatGPT 文件夹
+> 1. **Continuous monitoring of the ChatGPT folder**
+>    - cherry-import.exe runs continuously in the background
+>    - Real-time monitoring of the specified ChatGPT folder
 >
-> 2. **自动导入 MD 文件**
->    - 当新的 MD 文件放入 ChatGPT 文件夹时
->    - cherry-import.exe 自动检测到
->    - 自动导入到 Cherry Studio
+> 2. **Automatic import of MD files**
+>    - When new MD files are placed in the ChatGPT folder
+>    - cherry-import.exe automatically detects them
+>    - Automatically imports to Cherry Studio
 >
-> 3. **自动删除已导入的 MD 文件**
->    - 导入完成后，cherry-import.exe 会自动删除该 MD 文件
->    - 保持 ChatGPT 文件夹的整洁
+> 3. **Automatic deletion of imported MD files**
+>    - After import is complete, cherry-import.exe automatically deletes the MD file
+>    - Keeps the ChatGPT folder clean
 
-![Cherry Studio 导入结果](images/image%20copy%203.png)
+![Cherry Studio Import Result](images/image%20copy%203.png)

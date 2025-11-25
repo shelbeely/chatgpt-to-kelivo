@@ -1,9 +1,9 @@
 // ChatGPT to Kelivo - Popup Script
 
-// 加载配置
+// Load configuration
 function loadConfig() {
     chrome.storage.sync.get({
-        defaultAssistant: '默认助手',
+        defaultAssistant: 'Default Assistant',
         serverUrl: 'http://localhost:8765'
     }, (items) => {
         document.getElementById('assistant').value = items.defaultAssistant;
@@ -11,18 +11,18 @@ function loadConfig() {
     });
 }
 
-// 保存配置
+// Save configuration
 function saveConfig() {
     const assistant = document.getElementById('assistant').value.trim();
     const serverUrl = document.getElementById('serverUrl').value.trim();
 
     if (!assistant) {
-        showStatus('请输入助手名称', 'error');
+        showStatus('Please enter an assistant name', 'error');
         return;
     }
 
     if (!serverUrl) {
-        showStatus('请输入服务器地址', 'error');
+        showStatus('Please enter a server URL', 'error');
         return;
     }
 
@@ -30,11 +30,11 @@ function saveConfig() {
         defaultAssistant: assistant,
         serverUrl: serverUrl
     }, () => {
-        showStatus('✅ 设置已保存', 'success');
+        showStatus('✅ Settings saved', 'success');
     });
 }
 
-// 显示状态消息
+// Display status message
 function showStatus(message, type) {
     const statusEl = document.getElementById('status');
     statusEl.textContent = message;
@@ -45,13 +45,13 @@ function showStatus(message, type) {
     }, 3000);
 }
 
-// 初始化
+// Initialize
 document.addEventListener('DOMContentLoaded', () => {
     loadConfig();
     
     document.getElementById('saveBtn').addEventListener('click', saveConfig);
     
-    // 回车保存
+    // Save on Enter key
     document.querySelectorAll('input').forEach(input => {
         input.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {

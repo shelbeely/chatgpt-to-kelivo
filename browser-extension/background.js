@@ -1,32 +1,32 @@
 // ChatGPT to Kelivo - Background Service Worker
-// 通过 HTTP 与本地导入服务器通信
+// Communicates with local import server via HTTP
 
-// 监听来自 content script 的消息
+// Listen for messages from content script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'exportToKelivo') {
         handleExportToKelivo(request.data)
             .then(result => sendResponse({ success: true, result }))
             .catch(error => sendResponse({ success: false, error: error.message }));
 
-        // 返回 true 表示异步响应
+        // Return true to indicate async response
         return true;
     } else if (request.action === 'checkServer') {
         checkServerStatus()
             .then(result => sendResponse({ success: true, running: result.running }))
             .catch(error => sendResponse({ success: false, running: false, error: error.message }));
 
-        // 返回 true 表示异步响应
+        // Return true to indicate async response
         return true;
     }
 });
 
-// 处理导出到 Kelivo
+// Handle export to Kelivo
 async function handleExportToKelivo(data) {
     try {
-        // 获取配置
+        // Get configuration
         const config = await getConfig();
 
-        // 发送到本地服务器
+        // Send to local server
         const response = await fetch(`${config.serverUrl}/import`, {
             method: 'POST',
             headers: {
@@ -34,7 +34,7 @@ async function handleExportToKelivo(data) {
             },
             body: JSON.stringify({
                 markdown: data.markdown,
-                assistant: config.defaultAssistant || '默认助手',
+                assistant: config.defaultAssistant || 'Default Assistant',
                 title: data.title
             })
         });
@@ -42,40 +42,40 @@ async function handleExportToKelivo(data) {
         if (!response.ok) {
             const error = await response.json();
 
-            // 特殊处理 Kelivo 运行中的错误
+            // Special handling for Kelivo running error
             if (error.error === 'KELIVO_RUNNING') {
-                throw new Error('KELIVO_RUNNING:' + (error.message || '请先关闭 Kelivo 应用'));
+                throw new Error('KELIVO_RUNNING:' + (error.message || 'Please close the Kelivo application first'));
             }
 
-            throw new Error(error.error || '导入失败');
+            throw new Error(error.error || 'Import failed');
         }
 
         const result = await response.json();
         return result;
     } catch (error) {
-        console.error('导出失败:', error);
+        console.error('Export failed:', error);
 
-        // 如果是网络错误，提示用户启动服务器
+        // If network error, prompt user to start server
         if (error.message.includes('fetch')) {
-            throw new Error('无法连接到 Kelivo 导入服务器\n\n请先运行: dart run tools/import_server.dart');
+            throw new Error('Cannot connect to Kelivo import server\n\nPlease run: dart run tools/import_server.dart');
         }
 
         throw error;
     }
 }
 
-// 检查服务器状态
+// Check server status
 async function checkServerStatus() {
     try {
         const config = await getConfig();
-        console.log('[Server Check] 开始检查服务器状态，URL:', config.serverUrl);
+        console.log('[Server Check] Starting server status check, URL:', config.serverUrl);
 
-        // 方法1: 尝试 /health 端点
-        console.log('[Server Check] 方法1: 尝试 /health 端点...');
+        // Method 1: Try /health endpoint
+        console.log('[Server Check] Method 1: Trying /health endpoint...');
         try {
             const healthController = new AbortController();
             const healthTimeoutId = setTimeout(() => {
-                console.log('[Server Check] /health 请求超时');
+                console.log('[Server Check] /health request timeout');
                 healthController.abort();
             }, 2000);
 
@@ -85,26 +85,26 @@ async function checkServerStatus() {
             });
 
             clearTimeout(healthTimeoutId);
-            console.log('[Server Check] /health 响应状态码:', healthResponse.status);
+            console.log('[Server Check] /health response status code:', healthResponse.status);
 
-            // 如果返回 200，说明服务器支持 /health 端点
+            // If returns 200, server supports /health endpoint
             if (healthResponse.ok) {
-                console.log('[Server Check] ✅ 服务器支持 /health，检测成功');
+                console.log('[Server Check] ✅ Server supports /health, check successful');
                 return { running: true };
             }
 
-            console.log('[Server Check] /health 返回非 200，继续尝试 OPTIONS...');
+            console.log('[Server Check] /health returned non-200, continuing with OPTIONS...');
         } catch (healthError) {
-            console.log('[Server Check] /health 请求失败:', healthError.message);
-            console.log('[Server Check] 继续尝试 OPTIONS...');
+            console.log('[Server Check] /health request failed:', healthError.message);
+            console.log('[Server Check] Continuing with OPTIONS...');
         }
 
-        // 方法2: 尝试 OPTIONS 请求到 /import
-        console.log('[Server Check] 方法2: 尝试 OPTIONS 请求到 /import...');
+        // Method 2: Try OPTIONS request to /import
+        console.log('[Server Check] Method 2: Trying OPTIONS request to /import...');
         try {
             const optionsController = new AbortController();
             const optionsTimeoutId = setTimeout(() => {
-                console.log('[Server Check] OPTIONS 请求超时');
+                console.log('[Server Check] OPTIONS request timeout');
                 optionsController.abort();
             }, 2000);
 
@@ -114,29 +114,29 @@ async function checkServerStatus() {
             });
 
             clearTimeout(optionsTimeoutId);
-            console.log('[Server Check] OPTIONS 响应状态码:', optionsResponse.status);
-            console.log('[Server Check] ✅ 服务器响应了 OPTIONS，检测成功');
+            console.log('[Server Check] OPTIONS response status code:', optionsResponse.status);
+            console.log('[Server Check] ✅ Server responded to OPTIONS, check successful');
 
-            // 只要服务器有响应（不管状态码），就认为服务器在运行
+            // As long as server responds (regardless of status code), consider server running
             return { running: true };
         } catch (optionsError) {
-            console.log('[Server Check] OPTIONS 请求失败:', optionsError.message);
-            console.log('[Server Check] ❌ 两种方法都失败，服务器未运行');
-            // OPTIONS 也失败了，服务器未运行
+            console.log('[Server Check] OPTIONS request failed:', optionsError.message);
+            console.log('[Server Check] ❌ Both methods failed, server not running');
+            // OPTIONS also failed, server not running
             return { running: false };
         }
     } catch (error) {
-        console.log('[Server Check] ❌ 检查过程出错:', error.message);
-        // 获取配置失败或其他错误
+        console.log('[Server Check] ❌ Check process error:', error.message);
+        // Failed to get config or other error
         return { running: false };
     }
 }
 
-// 获取配置
+// Get configuration
 async function getConfig() {
     return new Promise((resolve) => {
         chrome.storage.sync.get({
-            defaultAssistant: '默认助手',
+            defaultAssistant: 'Default Assistant',
             serverUrl: 'http://localhost:8765'
         }, (items) => {
             resolve(items);
@@ -144,7 +144,7 @@ async function getConfig() {
     });
 }
 
-// 保存配置
+// Save configuration
 async function saveConfig(config) {
     return new Promise((resolve) => {
         chrome.storage.sync.set(config, () => {
@@ -153,14 +153,14 @@ async function saveConfig(config) {
     });
 }
 
-// 监听安装事件
+// Listen for install event
 chrome.runtime.onInstalled.addListener((details) => {
     if (details.reason === 'install') {
-        console.log('ChatGPT to Kelivo 扩展已安装');
+        console.log('ChatGPT to Kelivo extension installed');
 
-        // 设置默认配置
+        // Set default configuration
         saveConfig({
-            defaultAssistant: '默认助手',
+            defaultAssistant: 'Default Assistant',
             serverUrl: 'http://localhost:8765'
         });
     }
