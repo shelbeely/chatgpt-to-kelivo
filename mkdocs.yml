@@ -1,0 +1,88 @@
+# MkDocs Configuration
+# Documentation: https://www.mkdocs.org/
+
+site_name: ChatGPT to Kelivo
+site_description: Export ChatGPT conversations to Kelivo and other applications
+site_author: ChatGPT to Kelivo Contributors
+site_url: https://github.com/shelbeely/chatgpt-to-kelivo
+
+# Repository information
+repo_name: shelbeely/chatgpt-to-kelivo
+repo_url: https://github.com/shelbeely/chatgpt-to-kelivo
+
+# Theme configuration
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - content.code.copy
+  icon:
+    repo: fontawesome/brands/github
+
+# Navigation structure
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Quick Start: getting-started/quick-start.md
+    - Installation: getting-started/installation.md
+  - Standalone Converter:
+    - Overview: standalone-tool/overview.md
+    - Usage Guide: standalone-tool/usage.md
+    - Mobile Usage: standalone-tool/mobile.md
+    - Troubleshooting: standalone-tool/troubleshooting.md
+  - Browser Extension:
+    - Overview: browser-extension/overview.md
+    - Installation: browser-extension/installation.md
+    - Export Modes: browser-extension/export-modes.md
+  - GitHub Action:
+    - Overview: github-action/overview.md
+    - Usage Guide: github-action/usage.md
+    - Configuration: github-action/configuration.md
+  - Development:
+    - Contributing: development/contributing.md
+    - API Reference: development/api-reference.md
+
+# Plugins
+plugins:
+  - search
+
+# Markdown extensions
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+# Extra CSS and JavaScript
+extra_css:
+  - stylesheets/extra.css
+
+# Copyright
+copyright: Copyright &copy; 2024 ChatGPT to Kelivo Contributors

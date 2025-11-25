@@ -1,8 +1,51 @@
 # ChatGPT Export Tool
 
-A powerful browser extension that exports ChatGPT conversations to multiple local applications. Supports three export modes to meet different usage needs.
+A powerful tool for exporting ChatGPT conversations to [Kelivo](https://github.com/Chevey339/kelivo) and other local applications. Available as a **browser extension**, **standalone web-based converter** (no installation required!), and **GitHub Action** for automated conversion.
 
-> ⚠️ **Important Note**: On first use, the browser will prompt for clipboard permissions. The export will fail at this point, which is normal. Please grant the permission, then **click the export button again** to successfully export.
+> ⚠️ **Important Note**: For the browser extension, on first use, the browser will prompt for clipboard permissions. The export will fail at this point, which is normal. Please grant the permission, then **click the export button again** to successfully export.
+
+---
+
+## 🤖 GitHub Action (NEW! - Automated Conversion)
+
+**Perfect for automation!** Convert your ChatGPT exports using GitHub Actions - ideal for batch processing and CI/CD workflows.
+
+### Quick Start
+
+1. **Upload conversations.json** to your repository
+2. **Go to Actions tab** → **Convert ChatGPT to Kelivo**
+3. **Run workflow** with the file path
+4. **Download converted files** from the workflow artifacts
+
+[See detailed instructions →](.github/README.md)
+
+---
+
+## 📱 Standalone Web Converter (No Installation Required)
+
+**Perfect for mobile users!** Convert your ChatGPT exports to [Kelivo](https://github.com/Chevey339/kelivo) format directly in your browser - works on phones, tablets, and desktops without any installation.
+
+### Quick Start
+
+1. **Open the converter**: Open `standalone-tool/index.html` in any web browser, or host it on any web server
+2. **Export your ChatGPT data**: Go to [chatgpt.com](https://chatgpt.com) → Settings → Data Controls → Export data
+3. **Wait for email**: You'll receive an email with a download link for your data
+4. **Upload the ZIP file**: Upload your ChatGPT export ZIP file to the converter
+5. **Convert & Download**: Click "Convert" and download the Kelivo-compatible .md files
+6. **Import to Kelivo**: Transfer the .md files to your device and import them into [Kelivo](https://github.com/Chevey339/kelivo)
+
+### Features
+- 📱 **Mobile-friendly**: Works perfectly on phones and tablets
+- 🌐 **No installation**: Just open the HTML file in any browser
+- 🔒 **Privacy-first**: All processing happens locally in your browser - your data never leaves your device
+- 🌍 **Multi-language**: Supports English, Chinese, Spanish, French, German, Portuguese, Japanese, and Korean
+- 📦 **Bulk conversion**: Convert all your conversations at once and download as a ZIP
+
+---
+
+## 🖥️ Browser Extension
+
+The browser extension provides direct export from ChatGPT conversations with one click.
 
 ## 📦 Installation Steps
 
@@ -122,3 +165,17 @@ Follow the steps in **Mode 1** to export an MD file, and remember the file save 
 >    - Keeps the ChatGPT folder clean
 
 ![Cherry Studio Import Result](images/image%20copy%203.png)
+
+---
+
+## 📖 Documentation
+
+For detailed documentation, see the `docs/` folder or visit our documentation site.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🔗 Related Projects
+
+- [Kelivo](https://github.com/Chevey339/kelivo) - The local AI assistant application this tool exports to
