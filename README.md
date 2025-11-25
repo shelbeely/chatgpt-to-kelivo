@@ -1,6 +1,6 @@
 # ChatGPT Export Tool
 
-A powerful tool for exporting ChatGPT conversations to Kelivo and other local applications. Available as both a **browser extension** and a **standalone web-based converter** (no installation required!).
+A powerful tool for exporting ChatGPT conversations to [Kelivo](https://github.com/Chevey339/kelivo) and other local applications. Available as both a **browser extension** and a **standalone web-based converter** (no installation required!).
 
 > ⚠️ **Important Note**: For the browser extension, on first use, the browser will prompt for clipboard permissions. The export will fail at this point, which is normal. Please grant the permission, then **click the export button again** to successfully export.
 
@@ -8,7 +8,7 @@ A powerful tool for exporting ChatGPT conversations to Kelivo and other local ap
 
 ## 📱 Standalone Web Converter (NEW! - No Installation Required)
 
-**Perfect for mobile users!** Convert your ChatGPT exports to Kelivo format directly in your browser - works on phones, tablets, and desktops without any installation.
+**Perfect for mobile users!** Convert your ChatGPT exports to [Kelivo](https://github.com/Chevey339/kelivo) format directly in your browser - works on phones, tablets, and desktops without any installation.
 
 ### Quick Start
 
@@ -17,7 +17,7 @@ A powerful tool for exporting ChatGPT conversations to Kelivo and other local ap
 3. **Wait for email**: You'll receive an email with a download link for your data
 4. **Upload the ZIP file**: Upload your ChatGPT export ZIP file to the converter
 5. **Convert & Download**: Click "Convert" and download the Kelivo-compatible .md files
-6. **Import to Kelivo**: Transfer the .md files to your device and import them into Kelivo
+6. **Import to Kelivo**: Transfer the .md files to your device and import them into [Kelivo](https://github.com/Chevey339/kelivo)
 
 ### Features
 - 📱 **Mobile-friendly**: Works perfectly on phones and tablets
@@ -150,3 +150,17 @@ Follow the steps in **Mode 1** to export an MD file, and remember the file save 
 >    - Keeps the ChatGPT folder clean
 
 ![Cherry Studio Import Result](images/image%20copy%203.png)
+
+---
+
+## 📖 Documentation
+
+For detailed documentation, see the `docs/` folder or visit our documentation site.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🔗 Related Projects
+
+- [Kelivo](https://github.com/Chevey339/kelivo) - The local AI assistant application this tool exports to

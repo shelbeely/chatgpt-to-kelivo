@@ -1,0 +1,28 @@
+/* Extra styles for MkDocs Material theme */
+
+/* Custom button styles */
+.md-button {
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Code block styling */
+.highlight pre {
+    border-radius: 8px;
+}
+
+/* Admonition styling */
+.admonition {
+    border-radius: 8px;
+}
+
+/* Table styling */
+table {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Footer styling */
+.md-footer {
+    margin-top: 2rem;
+}

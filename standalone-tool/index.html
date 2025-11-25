@@ -1,26 +1,64 @@
 <!DOCTYPE html>
+<!--
+    ChatGPT to Kelivo Converter - Standalone Web Tool
+    
+    This is a mobile-friendly, browser-based tool for converting ChatGPT exports
+    to Kelivo-compatible markdown format. No installation or server required.
+    
+    Kelivo: https://github.com/Chevey339/kelivo
+    
+    Features:
+    - Works on any device (mobile, tablet, desktop)
+    - Processes ChatGPT export ZIP files or conversations.json directly
+    - Converts conversations to Kelivo-compatible markdown format
+    - Supports multiple languages (EN, ZH, ES, FR, DE, PT, JA, KO)
+    - All processing happens locally in the browser (privacy-first)
+    
+    Usage:
+    1. Open this HTML file in any web browser
+    2. Upload your ChatGPT export ZIP file
+    3. Click "Convert" to process the conversations
+    4. Download individual files or all as a ZIP
+    
+    Repository: https://github.com/shelbeely/chatgpt-to-kelivo
+    License: MIT License - https://opensource.org/licenses/MIT
+    
+    Copyright (c) 2024 ChatGPT to Kelivo Contributors
+-->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <!-- Enable responsive design for mobile devices -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <meta name="description" content="Convert ChatGPT exports to Kelivo-compatible format. Works on mobile and desktop.">
     <title>ChatGPT to Kelivo Converter</title>
+    
+    <!-- 
+        Embedded CSS Styles
+        All styles are inline to keep this as a single-file solution.
+        Uses CSS custom properties (variables) for easy theming.
+    -->
     <style>
+        /* Reset default browser styles for consistent appearance */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        /* 
+            CSS Custom Properties (Variables)
+            These define the color scheme and can be easily modified for theming.
+        */
         :root {
-            --primary: #667eea;
-            --primary-dark: #764ba2;
-            --success: #10b981;
-            --error: #ef4444;
-            --text: #333;
-            --text-light: #666;
-            --bg: #f5f7fa;
-            --card-bg: #ffffff;
+            --primary: #667eea;        /* Primary brand color (purple-blue) */
+            --primary-dark: #764ba2;   /* Darker shade for gradients */
+            --success: #10b981;        /* Success/positive actions (green) */
+            --error: #ef4444;          /* Error/warning states (red) */
+            --text: #333;              /* Primary text color */
+            --text-light: #666;        /* Secondary/muted text color */
+            --bg: #f5f7fa;             /* Page background color */
+            --card-bg: #ffffff;        /* Card/container background */
         }
 
         body {
@@ -547,11 +585,28 @@
         </div>
     </div>
 
-    <!-- JSZip Library -->
+    <!-- 
+        JSZip Library - Required for ZIP file handling
+        Used to extract conversations.json from ChatGPT export ZIP files
+        and to create ZIP downloads of converted files.
+        CDN: https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js
+    -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
     <script>
-        // Translations
+        /**
+         * ==========================================================================
+         * INTERNATIONALIZATION (i18n) SYSTEM
+         * ==========================================================================
+         * This section contains all translations for the user interface.
+         * Supported languages: English, Chinese, Spanish, French, German, 
+         * Portuguese, Japanese, and Korean.
+         * 
+         * To add a new language:
+         * 1. Add a new key to the translations object (e.g., 'it' for Italian)
+         * 2. Copy all keys from 'en' and translate the values
+         * 3. Add the language option to the HTML select element
+         */
         const translations = {
             en: {
                 pageTitle: '📱 ChatGPT to Kelivo Converter',
@@ -819,11 +874,39 @@
             }
         };
 
+        /**
+         * ==========================================================================
+         * APPLICATION STATE
+         * ==========================================================================
+         * Global variables that track the current state of the application.
+         */
+        
+        /** Current language code (e.g., 'en', 'zh', 'es') */
         let currentLang = 'en';
+        
+        /** The file selected by the user (ZIP or JSON) */
         let selectedFile = null;
+        
+        /** Array of converted file objects ready for download */
         let convertedFiles = [];
 
-        // Translation helper
+        /**
+         * ==========================================================================
+         * TRANSLATION FUNCTIONS
+         * ==========================================================================
+         */
+        
+        /**
+         * Get translated text for a given key.
+         * Supports parameter substitution using {paramName} syntax.
+         * 
+         * @param {string} key - The translation key to look up
+         * @param {Object} params - Optional parameters to substitute in the text
+         * @returns {string} The translated text with parameters replaced
+         * 
+         * @example
+         * t('success_converted', { count: 5 }) // Returns "Successfully converted 5 conversations!"
+         */
         function t(key, params = {}) {
             let text = translations[currentLang][key] || translations.en[key] || key;
             for (const [param, value] of Object.entries(params)) {
@@ -832,14 +915,22 @@
             return text;
         }
 
-        // Change language
+        /**
+         * Change the current UI language and persist the preference.
+         * 
+         * @param {string} lang - Language code (e.g., 'en', 'zh')
+         */
         function changeLanguage(lang) {
             currentLang = lang;
             updateUI();
+            // Persist language preference in localStorage
             localStorage.setItem('kelivo-converter-lang', lang);
         }
 
-        // Update UI text
+        /**
+         * Update all UI text elements to reflect the current language.
+         * Called after language change or on initial page load.
+         */
         function updateUI() {
             document.getElementById('pageTitle').textContent = t('pageTitle');
             document.getElementById('pageSubtitle').textContent = t('pageSubtitle');
@@ -863,14 +954,24 @@
             document.getElementById('footerText').textContent = t('footerText');
         }
 
-        // Initialize
+        /**
+         * ==========================================================================
+         * INITIALIZATION
+         * ==========================================================================
+         */
+        
+        /**
+         * Initialize the application when the DOM is ready.
+         * Sets up language preference, drag-and-drop handlers, and UI state.
+         */
         document.addEventListener('DOMContentLoaded', () => {
+            // Restore saved language preference or default to English
             const savedLang = localStorage.getItem('kelivo-converter-lang') || 'en';
             currentLang = savedLang;
             document.getElementById('languageSelect').value = savedLang;
             updateUI();
 
-            // Setup drag and drop
+            // Setup drag and drop file handling
             const uploadArea = document.getElementById('uploadArea');
             
             uploadArea.addEventListener('dragover', (e) => {
@@ -892,7 +993,17 @@
             });
         });
 
-        // Handle file selection
+        /**
+         * ==========================================================================
+         * FILE HANDLING
+         * ==========================================================================
+         */
+        
+        /**
+         * Handle file selection from the file input element.
+         * 
+         * @param {Event} event - The change event from the file input
+         */
         function handleFileSelect(event) {
             const file = event.target.files[0];
             if (file) {
@@ -900,12 +1011,19 @@
             }
         }
 
+        /**
+         * Process and validate a selected file.
+         * Accepts ZIP or JSON files only.
+         * 
+         * @param {File} file - The file object from file input or drag-drop
+         */
         function handleFile(file) {
             const uploadArea = document.getElementById('uploadArea');
             const fileName = document.getElementById('fileName');
             const uploadIcon = document.getElementById('uploadIcon');
             const convertBtn = document.getElementById('convertBtn');
 
+            // Validate file extension
             if (file.name.endsWith('.zip') || file.name.endsWith('.json')) {
                 selectedFile = file;
                 uploadArea.classList.add('has-file');
@@ -918,17 +1036,36 @@
             }
         }
 
-        // Show/hide message
+        /**
+         * ==========================================================================
+         * UI FEEDBACK FUNCTIONS
+         * ==========================================================================
+         */
+        
+        /**
+         * Display a message to the user (success, error, or info).
+         * 
+         * @param {string} text - The message text to display
+         * @param {string} type - Message type: 'success', 'error', or 'info'
+         */
         function showMessage(text, type) {
             const container = document.getElementById('messageContainer');
             container.innerHTML = `<div class="message ${type}">${text}</div>`;
         }
 
+        /**
+         * Hide any currently displayed message.
+         */
         function hideMessage() {
             document.getElementById('messageContainer').innerHTML = '';
         }
 
-        // Update progress
+        /**
+         * Update the progress bar and status text.
+         * 
+         * @param {number} percent - Progress percentage (0-100)
+         * @param {string} text - Status text to display
+         */
         function updateProgress(percent, text) {
             const container = document.getElementById('progressContainer');
             const fill = document.getElementById('progressFill');
@@ -939,11 +1076,26 @@
             progressText.textContent = text;
         }
 
+        /**
+         * Hide the progress bar.
+         */
         function hideProgress() {
             document.getElementById('progressContainer').classList.remove('show');
         }
 
-        // Start conversion
+        /**
+         * ==========================================================================
+         * CONVERSION LOGIC
+         * ==========================================================================
+         */
+        
+        /**
+         * Main conversion function. Orchestrates the entire conversion process:
+         * 1. Validates file selection
+         * 2. Extracts conversations from ZIP or parses JSON
+         * 3. Converts each conversation to Kelivo format
+         * 4. Displays results for download
+         */
         async function startConversion() {
             if (!selectedFile) {
                 showMessage(t('error_no_file'), 'error');
@@ -953,6 +1105,7 @@
             const convertBtn = document.getElementById('convertBtn');
             const convertBtnText = document.getElementById('convertBtnText');
             
+            // Disable button and show loading state
             convertBtn.disabled = true;
             convertBtn.classList.add('loading');
             convertBtnText.innerHTML = `<span class="spinner"></span> ${t('converting')}`;
@@ -963,6 +1116,7 @@
             try {
                 let conversations;
 
+                // Handle ZIP vs JSON file
                 if (selectedFile.name.endsWith('.zip')) {
                     updateProgress(10, t('extracting'));
                     conversations = await extractConversationsFromZip(selectedFile);
@@ -972,15 +1126,18 @@
                     conversations = JSON.parse(text);
                 }
 
+                // Validate conversations array
                 if (!conversations || !Array.isArray(conversations) || conversations.length === 0) {
                     throw new Error(t('error_no_conversations'));
                 }
 
                 updateProgress(30, t('converting_conv'));
 
+                // Get assistant name from settings or use default
                 const assistantName = document.getElementById('assistantName').value.trim() || t('assistantPlaceholder');
                 let totalMessages = 0;
 
+                // Convert each conversation
                 for (let i = 0; i < conversations.length; i++) {
                     const conv = conversations[i];
                     const progress = 30 + Math.floor((i / conversations.length) * 60);
@@ -1003,6 +1160,7 @@
                 console.error('Conversion error:', error);
                 showMessage(error.message || t('error_invalid_file'), 'error');
             } finally {
+                // Reset button state
                 convertBtn.disabled = false;
                 convertBtn.classList.remove('loading');
                 convertBtnText.textContent = t('convertBtn');
@@ -1010,11 +1168,18 @@
             }
         }
 
-        // Extract conversations from ZIP
+        /**
+         * Extract conversations.json from a ChatGPT export ZIP file.
+         * Uses JSZip library for ZIP file handling.
+         * 
+         * @param {File} zipFile - The ZIP file to extract
+         * @returns {Promise<Array>} Array of conversation objects
+         * @throws {Error} If conversations.json is not found in the ZIP
+         */
         async function extractConversationsFromZip(zipFile) {
             const zip = await JSZip.loadAsync(zipFile);
             
-            // Look for conversations.json
+            // Look for conversations.json in the ZIP
             const conversationsFile = zip.file('conversations.json');
             if (!conversationsFile) {
                 throw new Error(t('error_no_conversations'));
@@ -1024,18 +1189,32 @@
             return JSON.parse(content);
         }
 
-        // Convert a single conversation
+        /**
+         * Convert a single ChatGPT conversation to Kelivo markdown format.
+         * 
+         * ChatGPT export format uses a tree structure (mapping) where each node
+         * contains a message and references to child nodes. This function:
+         * 1. Extracts the conversation title
+         * 2. Traverses the message tree to get ordered messages
+         * 3. Filters for user and assistant messages only
+         * 4. Generates Kelivo-compatible markdown
+         * 
+         * @param {Object} conv - ChatGPT conversation object
+         * @param {string} assistantName - Name to use for the assistant in Kelivo
+         * @returns {Object|null} Converted file object or null if no messages
+         */
         function convertConversation(conv, assistantName) {
             const title = conv.title || 'Untitled Conversation';
             const messages = [];
             
-            // Process the conversation mapping
+            // Process the conversation mapping (tree structure)
             if (conv.mapping) {
                 const sortedNodes = getSortedMessages(conv.mapping);
                 
                 for (const node of sortedNodes) {
                     if (node.message && node.message.content && node.message.content.parts) {
                         const role = node.message.author?.role;
+                        // Only include user and assistant messages (skip system messages)
                         if (role === 'user' || role === 'assistant') {
                             const content = node.message.content.parts.join('\n').trim();
                             if (content) {
@@ -1053,7 +1232,7 @@
                 return null;
             }
 
-            // Generate markdown
+            // Generate markdown with Kelivo-compatible format
             const markdown = generateMarkdown(messages, title, assistantName);
             const timestamp = conv.create_time ? new Date(conv.create_time * 1000) : new Date();
             const safeTitle = sanitizeFilename(title);
@@ -1068,7 +1247,18 @@
             };
         }
 
-        // Get sorted messages from mapping
+        /**
+         * Traverse the ChatGPT conversation tree and return messages in order.
+         * 
+         * ChatGPT stores conversations as a tree where each node has a parent
+         * and zero or more children. This function:
+         * 1. Finds the root node (node with no parent)
+         * 2. Traverses the tree following child references
+         * 3. Returns nodes in conversation order
+         * 
+         * @param {Object} mapping - The conversation mapping object from ChatGPT export
+         * @returns {Array} Array of message nodes in conversation order
+         */
         function getSortedMessages(mapping) {
             const nodes = [];
             const visited = new Set();
@@ -1082,7 +1272,7 @@
                 }
             }
 
-            // Traverse the tree
+            // Traverse the tree following the conversation thread
             while (currentId && !visited.has(currentId)) {
                 visited.add(currentId);
                 const node = mapping[currentId];
@@ -1103,10 +1293,26 @@
             return nodes;
         }
 
-        // Generate markdown for Kelivo
+        /**
+         * Generate Kelivo-compatible markdown from conversation messages.
+         * 
+         * Kelivo expects markdown with YAML frontmatter containing:
+         * - assistantName: The name of the AI assistant
+         * - topicId: Unique identifier for the conversation
+         * - topicName: Human-readable title
+         * 
+         * Messages are formatted as H2 headers with role labels and content.
+         * 
+         * @param {Array} messages - Array of message objects with role and content
+         * @param {string} title - Conversation title for the topic name
+         * @param {string} assistantName - Name to use for the assistant
+         * @returns {string} Complete markdown string for Kelivo
+         */
         function generateMarkdown(messages, title, assistantName) {
+            // Generate unique topic ID using timestamp and random string
             const topicId = `topic_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
             
+            // YAML frontmatter for Kelivo
             let markdown = `---
 assistantName: ${assistantName}
 topicId: ${topicId}
@@ -1114,12 +1320,14 @@ topicName: ${title}
 ---
 `;
 
+            // Format each message with role header
             for (const msg of messages) {
                 const roleLabel = msg.role === 'user' 
                     ? `🧑‍💻 ${t('userRole')}` 
                     : `🤖 ${t('assistantRole')}`;
                 
-                // Process content to handle any quotes
+                // Process content to handle markdown quotes
+                // Convert > quote syntax to indented format for Kelivo compatibility
                 let content = msg.content;
                 const lines = content.split('\n');
                 const processedLines = lines.map(line => {
@@ -1136,24 +1344,44 @@ topicName: ${title}
             return markdown;
         }
 
-        // Sanitize filename
+        /**
+         * Sanitize a string for use as a filename.
+         * Removes invalid characters and limits length.
+         * 
+         * @param {string} name - The original filename/title
+         * @returns {string} Safe filename string
+         */
         function sanitizeFilename(name) {
             return name
-                .replace(/[<>:"/\\|?*]/g, '_')
-                .replace(/\s+/g, '_')
-                .substring(0, 100);
+                .replace(/[<>:"/\\|?*]/g, '_')  // Remove invalid filename chars
+                .replace(/\s+/g, '_')            // Replace spaces with underscores
+                .substring(0, 100);              // Limit length
         }
 
-        // Display results
+        /**
+         * ==========================================================================
+         * RESULTS DISPLAY AND DOWNLOAD
+         * ==========================================================================
+         */
+        
+        /**
+         * Display the conversion results with download options.
+         * Shows statistics and a list of converted files.
+         * 
+         * @param {Array} files - Array of converted file objects
+         * @param {number} totalMessages - Total number of messages across all files
+         */
         function displayResults(files, totalMessages) {
             const resultsCard = document.getElementById('resultsCard');
             const resultsList = document.getElementById('resultsList');
             const statConversations = document.getElementById('statConversations');
             const statMessages = document.getElementById('statMessages');
 
+            // Update statistics display
             statConversations.textContent = files.length;
             statMessages.textContent = totalMessages;
 
+            // Build list of downloadable files
             resultsList.innerHTML = '';
             for (const file of files) {
                 const item = document.createElement('div');
@@ -1170,42 +1398,65 @@ topicName: ${title}
                 resultsList.appendChild(item);
             }
 
+            // Show the results card
             resultsCard.classList.add('show');
         }
 
-        // Escape HTML
+        /**
+         * Escape HTML special characters to prevent XSS.
+         * Uses the browser's built-in text content handling.
+         * 
+         * @param {string} text - The text to escape
+         * @returns {string} HTML-escaped text
+         */
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
 
-        // Download single file
+        /**
+         * Download a single converted file.
+         * Creates a blob URL and triggers a download.
+         * 
+         * @param {string} filename - The filename to download
+         */
         function downloadFile(filename) {
             const file = convertedFiles.find(f => f.filename === filename);
             if (file) {
+                // Create a blob with the markdown content
                 const blob = new Blob([file.content], { type: 'text/markdown;charset=utf-8' });
                 const url = URL.createObjectURL(blob);
+                
+                // Create and trigger download link
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = file.filename;
                 document.body.appendChild(a);
                 a.click();
+                
+                // Cleanup
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
             }
         }
 
-        // Download all as ZIP
+        /**
+         * Download all converted files as a single ZIP archive.
+         * Uses JSZip to create the archive.
+         */
         async function downloadAll() {
             if (convertedFiles.length === 0) return;
 
+            // Create ZIP archive
             const zip = new JSZip();
             
+            // Add all converted files to the ZIP
             for (const file of convertedFiles) {
                 zip.file(file.filename, file.content);
             }
 
+            // Generate and download the ZIP
             const blob = await zip.generateAsync({ type: 'blob' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
